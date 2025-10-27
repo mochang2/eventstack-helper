@@ -28,8 +28,9 @@ function calculateIndentation(
         if (isUsingTab) {
             insertSpaces = false;
             tabSize = 1;
-        } else {
-            // use spaces
+        }
+        // use spaces
+        else {
             const indentDifference =
                 functionBodyFirstLineIndent.length - functionIndent.length;
             insertSpaces = true;
@@ -45,7 +46,10 @@ function calculateIndentation(
     )}`;
 }
 
-function formatEventStackCode(indentation: string, { functionName, fileName, params }: FunctionInfo): string {
+function formatEventStackCode(
+    indentation: string,
+    { functionName, fileName, params }: FunctionInfo
+): string {
     return params.length > 0
         ? `\n${indentation}window.eventStack.set("function", "${functionName}(${fileName})", ${params.join(", ")});`
         : `\n${indentation}window.eventStack.set("function", "${functionName}(${fileName})");`;
@@ -81,19 +85,19 @@ async function moveCursorToEventStack(
     position: vscode.Position
 ): Promise<void> {
     const activeEditor = vscode.window.activeTextEditor;
+    // in case that active editor is the saved file
     if (
         activeEditor &&
         activeEditor.document.uri.toString() === fileUri.toString()
     ) {
-        // in case that active editor is the saved file
         const selection = new vscode.Selection(position, position);
         activeEditor.selection = selection;
         activeEditor.revealRange(
             selection,
             vscode.TextEditorRevealType.InCenter
         );
-    } else {
-        // in case that active editor is not the saved file
+    } // in case that active editor is not the saved file
+    else {
         const document = await vscode.workspace.openTextDocument(fileUri);
         const editor = await vscode.window.showTextDocument(document);
 
