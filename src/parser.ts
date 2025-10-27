@@ -6,6 +6,7 @@ import type {
     Identifier,
     MemberExpression,
     OptionalMemberExpression,
+    FunctionParameter,
     ObjectPattern,
     ObjectProperty,
     ArrayPattern,
@@ -68,6 +69,56 @@ function checkEventStackSetPattern(functionBody: BlockStatement): boolean {
                 node.expression.callee.type === "Identifier") &&
             isNormalEventStackSetCall(node.expression.callee)
     );
+}
+
+// only param1, param2, differentNameKey, arrayElement
+/*
+function externalNormalFunctionWithParameters(
+  param1,
+  param2, 
+  { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }, 
+  [arrayElement, ...restArrayElement],
+  ...rest
+) {
+    // blabla
+};
+*/
+function extractValidParams(params: FunctionParameter[]): string[] {
+    return params
+        .filter(
+            (param) =>
+                param.type === "ObjectPattern" ||
+                param.type === "ArrayPattern" ||
+                param.type === "Identifier"
+        )
+        .map((param) => {
+            if (param.type === "ObjectPattern") {
+                return (param as ObjectPattern).properties
+                    .filter(
+                        (property) =>
+                            property.type === "ObjectProperty" &&
+                            property.value.type === "Identifier" &&
+                            property.value.name
+                    )
+                    .map(
+                        (property) =>
+                            ((property as ObjectProperty).value as Identifier)
+                                .name
+                    );
+            } else if (param.type === "ArrayPattern") {
+                return (param as ArrayPattern).elements
+                    .filter(
+                        (element) =>
+                            element &&
+                            element.type === "Identifier" &&
+                            element.name
+                    )
+                    .map((element) => (element as Identifier).name);
+            } else {
+                return (param as Identifier).name;
+            }
+        })
+        .flat();
 }
 
 // only the below functions are included(whether the params are used or not)
@@ -143,48 +194,7 @@ export async function getFunctions(
                                 astResult.scriptStartLine,
                             column: path.node.body.loc.start.column + 1,
                         },
-                        params: path.node.params
-                            .filter(
-                                (param) =>
-                                    param.type === "ObjectPattern" ||
-                                    param.type === "ArrayPattern" ||
-                                    param.type === "Identifier"
-                            )
-                            .map((param) => {
-                                if (param.type === "ObjectPattern") {
-                                    return (param as ObjectPattern).properties
-                                        .filter(
-                                            (property) =>
-                                                property.type ===
-                                                    "ObjectProperty" &&
-                                                property.value.type ===
-                                                    "Identifier" &&
-                                                property.value.name
-                                        )
-                                        .map(
-                                            (property) =>
-                                                (
-                                                    (property as ObjectProperty)
-                                                        .value as Identifier
-                                                ).name
-                                        );
-                                } else if (param.type === "ArrayPattern") {
-                                    return (param as ArrayPattern).elements
-                                        .filter(
-                                            (element) =>
-                                                element &&
-                                                element.type === "Identifier" &&
-                                                element.name
-                                        )
-                                        .map(
-                                            (element) =>
-                                                (element as Identifier).name
-                                        );
-                                } else {
-                                    return (param as Identifier).name;
-                                }
-                            })
-                            .flat(),
+                        params: extractValidParams(path.node.params),
                         isEventStackSetExists: checkEventStackSetPattern(
                             path.node.body
                         ),
@@ -223,48 +233,7 @@ export async function getFunctions(
                                 astResult.scriptStartLine,
                             column: path.node.init.body.loc.start.column + 1,
                         },
-                        params: path.node.init.params
-                            .filter(
-                                (param) =>
-                                    param.type === "ObjectPattern" ||
-                                    param.type === "ArrayPattern" ||
-                                    param.type === "Identifier"
-                            )
-                            .map((param) => {
-                                if (param.type === "ObjectPattern") {
-                                    return (param as ObjectPattern).properties
-                                        .filter(
-                                            (property) =>
-                                                property.type ===
-                                                    "ObjectProperty" &&
-                                                property.value.type ===
-                                                    "Identifier" &&
-                                                property.value.name
-                                        )
-                                        .map(
-                                            (property) =>
-                                                (
-                                                    (property as ObjectProperty)
-                                                        .value as Identifier
-                                                ).name
-                                        );
-                                } else if (param.type === "ArrayPattern") {
-                                    return (param as ArrayPattern).elements
-                                        .filter(
-                                            (element) =>
-                                                element &&
-                                                element.type === "Identifier" &&
-                                                element.name
-                                        )
-                                        .map(
-                                            (element) =>
-                                                (element as Identifier).name
-                                        );
-                                } else {
-                                    return (param as Identifier).name;
-                                }
-                            })
-                            .flat(),
+                        params: extractValidParams(path.node.init.params),
                         isEventStackSetExists: checkEventStackSetPattern(
                             path.node.init.body
                         ),
