@@ -242,6 +242,8 @@ export async function getFunctions(
                 }
             },
         },
+        // functions declared inside an object are not included
+        // ObjectExpression: {},
     });
 
     functions.sort(
