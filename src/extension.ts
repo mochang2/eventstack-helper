@@ -12,12 +12,24 @@ export async function activate(context: vscode.ExtensionContext) {
             const savedFileUri = textDocument.uri;
             const newlyAddedFunctions =
                 await functionTracker.getNewlyAddedFunctions(savedFileUri);
+
             await automaticallyAddEventStack(savedFileUri, newlyAddedFunctions);
             await functionTracker.updateFile(savedFileUri);
         }
     );
 
-    context.subscriptions.push(onDidSaveTextDocument);
+    const onDidRenameFiles = vscode.workspace.onDidRenameFiles(
+        ({ files }) => {
+            for (const file of files) {
+                const oldFileUri = file.oldUri;
+                const newFileUri = file.newUri;
+
+                functionTracker.migrateFunctionInfo(oldFileUri, newFileUri);
+            }
+        }
+    );
+
+    context.subscriptions.push(onDidSaveTextDocument, onDidRenameFiles);
 }
 
 export function deactivate() {}

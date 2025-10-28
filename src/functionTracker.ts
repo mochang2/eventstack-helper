@@ -64,4 +64,20 @@ export class FunctionTracker {
             functions.map(({ functionName }) => functionName)
         );
     }
+
+    migrateFunctionInfo(oldUri: vscode.Uri, newUri: vscode.Uri): void {
+        const oldPath = oldUri.fsPath;
+        const newPath = newUri.fsPath;
+
+        if (this.fileFunctionNamesMap.has(oldPath)) {
+            const functionNames = this.fileFunctionNamesMap.get(oldPath)!;
+            this.fileFunctionNamesMap.set(newPath, functionNames);
+            this.fileFunctionNamesMap.delete(oldPath);
+        }
+
+        if (this.invalidFiles.has(oldPath)) {
+            this.invalidFiles.add(newPath);
+            this.invalidFiles.delete(oldPath);
+        }
+    }
 }
