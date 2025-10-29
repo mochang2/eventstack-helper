@@ -12,7 +12,6 @@ export type Position = {
 };
 
 export type FunctionInfo = {
-    fileName: string;
     functionName: string;
     declarationStartPosition: Position;
     bodyStartPosition: Position;

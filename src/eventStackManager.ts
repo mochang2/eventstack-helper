@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as path from "path";
 import type { Position, FunctionInfo } from "./types";
 
 function calculateIndentation(
@@ -48,8 +49,11 @@ function calculateIndentation(
 
 function formatEventStackCode(
     indentation: string,
-    { functionName, fileName, params }: FunctionInfo
+    fileFullPath: string,
+    { functionName, params }: FunctionInfo
 ): string {
+    const fileName = path.basename(fileFullPath);
+
     return params.length > 0
         ? `\n${indentation}window.eventStack.set("function", "${functionName}(${fileName})", ${params.join(", ")});`
         : `\n${indentation}window.eventStack.set("function", "${functionName}(${fileName})");`;
@@ -66,7 +70,7 @@ export async function addEventStackToFunction(
         functionInfo.declarationStartPosition,
         lineAdjustment
     );
-    const eventStackCode = formatEventStackCode(indentation, functionInfo);
+    const eventStackCode = formatEventStackCode(indentation, document.uri.fsPath, functionInfo);
 
     const edit = new vscode.WorkspaceEdit();
     const position = new vscode.Position(

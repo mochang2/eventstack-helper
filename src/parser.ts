@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as nodePath from "path";
 import traverse from "@babel/traverse";
 import type {
     BlockStatement,
@@ -164,7 +163,6 @@ export async function getFunctions(
     }
 
     const functions: FunctionInfo[] = [];
-    const fileNameWithExtension = nodePath.basename(file.fsPath);
 
     traverse(astResult.ast, {
         // functions declared with function keyword
@@ -179,7 +177,6 @@ export async function getFunctions(
                         path.node.body.loc.end.line
                 ) {
                     functions.push({
-                        fileName: fileNameWithExtension,
                         functionName: path.node.id.name,
                         declarationStartPosition: {
                             line:
@@ -218,7 +215,6 @@ export async function getFunctions(
                         path.node.init.body.loc.end.line
                 ) {
                     functions.push({
-                        fileName: fileNameWithExtension,
                         functionName: path.node.id.name,
                         declarationStartPosition: {
                             line:
