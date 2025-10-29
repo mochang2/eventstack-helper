@@ -27,7 +27,27 @@
       {
         "id": "vue"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "EventStack Helper",
+      "properties": {
+        "eventstack-helper.autoAddEventStack": {
+          "type": "boolean",
+          "default": true,
+          "description": "whether to automatically add eventStack when saving files"
+        },
+        "eventstack-helper.allowedFilePatterns": {
+          "type": "array",
+          "default": ["**/*.js", "**/*.ts", "**/*.vue"],
+          "description": "Automatically add eventStack to files matching these patterns"
+        },
+        "eventstack-helper.eventStackFunctionName": {
+          "type": "string",
+          "default": "window.eventStack.set",
+          "description": "name of the eventStack function"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
