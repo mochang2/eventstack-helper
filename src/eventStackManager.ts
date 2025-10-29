@@ -3,6 +3,40 @@ import * as path from "path";
 import { minimatch } from "minimatch";
 import type { Position, FunctionInfo } from "./types";
 
+function shouldProcessFunctions(
+    fileUri: vscode.Uri,
+    newlyAddedFunctions: FunctionInfo[]
+): boolean {
+    const isAddedFunctions = newlyAddedFunctions.length > 0;
+    if (!isAddedFunctions) {
+        return false;
+    }
+
+    const config = vscode.workspace.getConfiguration("eventstack-helper");
+    
+    const isAutoAddEventStackEnabled = config.get<boolean>(
+        "autoAddEventStack",
+        true
+    );
+    if (!isAutoAddEventStackEnabled) {
+        return false;
+    }
+
+    const allowedPatterns = config.get<string[]>("allowedFilePatterns", [
+        "**/*",
+    ]);
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(fileUri);
+    const filePathRelativeToWorkspaceRoot = workspaceFolder
+        ? vscode.workspace.asRelativePath(fileUri, false)
+        : fileUri.fsPath;
+
+    const isFileAllowed = allowedPatterns.some((pattern) => 
+        minimatch(filePathRelativeToWorkspaceRoot, pattern)
+    );
+    
+    return isFileAllowed;
+}
+
 function calculateIndentation(
     document: vscode.TextDocument,
     declarationStartPosition: Position,
@@ -120,30 +154,7 @@ export async function automaticallyAddEventStack(
     fileUri: vscode.Uri,
     newlyAddedFunctions: FunctionInfo[]
 ): Promise<void> {
-    if (newlyAddedFunctions.length === 0) {
-        return;
-    }
-
-    const config = vscode.workspace.getConfiguration("eventstack-helper"); // automatically handles priority (workspace > user > default)
-
-    const isAutoAddEventStackEnabled = config.get<boolean>(
-        "autoAddEventStack",
-        true
-    );
-    if (!isAutoAddEventStackEnabled) {
-        return;
-    }
-
-    const allowedPatterns = config.get<string[]>("allowedFilePatterns", [
-        "**/*",
-    ]);
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(fileUri);
-    const filePathRelativeToWorkspaceRoot = workspaceFolder
-        ? vscode.workspace.asRelativePath(fileUri, false)
-        : fileUri.fsPath;
-
-    const isFileAllowed = allowedPatterns.some((pattern) => minimatch(filePathRelativeToWorkspaceRoot, pattern));
-    if (!isFileAllowed) {
+    if (!shouldProcessFunctions(fileUri, newlyAddedFunctions)) {
         return;
     }
 
