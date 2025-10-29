@@ -87,11 +87,16 @@ function formatEventStackCode(
     fileFullPath: string,
     { functionName, params }: FunctionInfo
 ): string {
+    const config = vscode.workspace.getConfiguration("eventstack-helper");
+    const eventStackFunctionName = config.get<string>(
+        "eventStackFunctionName",
+        "window.eventStack.set"
+    );
     const fileName = path.basename(fileFullPath);
 
     return params.length > 0
-        ? `\n${indentation}window.eventStack.set("function", "${functionName}(${fileName})", ${params.join(", ")});`
-        : `\n${indentation}window.eventStack.set("function", "${functionName}(${fileName})");`;
+        ? `\n${indentation}${eventStackFunctionName}("function", "${functionName}(${fileName})", ${params.join(", ")});`
+        : `\n${indentation}${eventStackFunctionName}("function", "${functionName}(${fileName})");`;
 }
 
 // add indentation before eventStackCode according to the editor settings

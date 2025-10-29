@@ -49,12 +49,13 @@ function isNormalEventStackSetCall(
     callee: MemberExpression | OptionalMemberExpression | Identifier
 ): boolean {
     const extracted = extractAllNestedPropertyNames(callee);
-
-    return (
-        extracted.has("window") &&
-        extracted.has("eventStack") &&
-        extracted.has("set")
+    const config = vscode.workspace.getConfiguration("eventstack-helper");
+    const eventStackFunctionName = config.get<string>(
+        "eventStackFunctionName",
+        "window.eventStack.set"
     );
+
+    return eventStackFunctionName.split(".").every((objectNameOrMethodName) => extracted.has(objectNameOrMethodName));
 }
 
 function checkEventStackSetPattern(functionBody: BlockStatement): boolean {
