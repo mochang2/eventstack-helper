@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import { minimatch } from "minimatch";
 import type { Position, FunctionInfo } from "./types";
 
 function calculateIndentation(
@@ -70,7 +71,11 @@ export async function addEventStackToFunction(
         functionInfo.declarationStartPosition,
         lineAdjustment
     );
-    const eventStackCode = formatEventStackCode(indentation, document.uri.fsPath, functionInfo);
+    const eventStackCode = formatEventStackCode(
+        indentation,
+        document.uri.fsPath,
+        functionInfo
+    );
 
     const edit = new vscode.WorkspaceEdit();
     const position = new vscode.Position(
@@ -115,14 +120,30 @@ export async function automaticallyAddEventStack(
     fileUri: vscode.Uri,
     newlyAddedFunctions: FunctionInfo[]
 ): Promise<void> {
-    const isNoAddedFunctions = newlyAddedFunctions.length === 0;
-    if (isNoAddedFunctions) {
+    if (newlyAddedFunctions.length === 0) {
         return;
     }
 
     const config = vscode.workspace.getConfiguration("eventstack-helper"); // automatically handles priority (workspace > user > default)
-    const isAutoAddEventStack = config.get("autoAddEventStack", true);
-    if (!isAutoAddEventStack) {
+
+    const isAutoAddEventStackEnabled = config.get<boolean>(
+        "autoAddEventStack",
+        true
+    );
+    if (!isAutoAddEventStackEnabled) {
+        return;
+    }
+
+    const allowedPatterns = config.get<string[]>("allowedFilePatterns", [
+        "**/*",
+    ]);
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(fileUri);
+    const filePathRelativeToWorkspaceRoot = workspaceFolder
+        ? vscode.workspace.asRelativePath(fileUri, false)
+        : fileUri.fsPath;
+
+    const isFileAllowed = allowedPatterns.some((pattern) => minimatch(filePathRelativeToWorkspaceRoot, pattern));
+    if (!isFileAllowed) {
         return;
     }
 
