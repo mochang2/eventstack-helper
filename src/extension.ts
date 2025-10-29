@@ -2,6 +2,10 @@ import * as vscode from "vscode";
 import { FunctionTracker } from "./functionTracker";
 import { automaticallyAddEventStack } from "./eventStackManager";
 
+// tests not described in the fixtures
+// - When changing the name of the function, it should be added if there is no event stack because it is recognized as a new function
+// - If there is no eventStack for all functions declared in the file, you must add it even if you create a new file
+// - When renaming files, do not add eventStack because function information from the previous file is moved to the new file
 export async function activate(context: vscode.ExtensionContext) {
     const functionTracker = new FunctionTracker();
 
