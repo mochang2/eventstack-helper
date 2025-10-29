@@ -111,7 +111,14 @@ export async function automaticallyAddEventStack(
     fileUri: vscode.Uri,
     newlyAddedFunctions: FunctionInfo[]
 ): Promise<void> {
-    if (newlyAddedFunctions.length === 0) {
+    const isNoAddedFunctions = newlyAddedFunctions.length === 0;
+    if (isNoAddedFunctions) {
+        return;
+    }
+
+    const config = vscode.workspace.getConfiguration("eventstack-helper"); // automatically handles priority (workspace > user > default)
+    const isAutoAddEventStack = config.get("autoAddEventStack", true);
+    if (!isAutoAddEventStack) {
         return;
     }
 
