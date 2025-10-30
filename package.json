@@ -28,6 +28,30 @@
         "id": "vue"
       }
     ],
+    "commands": [
+      {
+        "command": "eventstack-helper.manualAddEventStack",
+        "title": "Add EventStack Manually",
+        "category": "EventStack Helper"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "eventstack-helper.manualAddEventStack",
+          "when": "editorTextFocus && (resourceExtname == '.js' || resourceExtname == '.ts' || resourceExtname == '.vue')",
+          "group": "navigation@9"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "eventstack-helper.manualAddEventStack",
+        "key": "ctrl+shift+e ctrl+shift+s",
+        "mac": "cmd+shift+e cmd+shift+s",
+        "when": "editorTextFocus && (resourceExtname == '.js' || resourceExtname == '.ts' || resourceExtname == '.vue')"
+      }
+    ],
     "configuration": {
       "title": "EventStack Helper",
       "properties": {
