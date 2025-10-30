@@ -1,7 +1,7 @@
 {
   "name": "eventstack-helper",
   "displayName": "EventStack Helper",
-  "description": "TODO",
+  "description": "VSCode extension that helps to add eventStack tracking codes to function declarations in JavaScript, TypeScript, and Vue files",
   "version": "1.0.0",
   "publisher": "qjsrodksro",
   "engines": {
