@@ -1,0 +1,45 @@
+name: Publish Extension
+
+on:
+  workflow_dispatch: # execute manually
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install VSCE and OVSX
+        run: npm install -g @vscode/vsce ovsx
+
+      - name: Publish to VS Code Marketplace & Open VSX
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          set -e
+          EXT_NAME="eventstack-helper"
+          VERSION=$(node -p "require('./package.json').version")
+
+          echo "📦 Packaging extension v$VERSION..."
+          vsce package
+
+          VSIX_FILE="$EXT_NAME-$VERSION.vsix"
+
+          echo "🚀 Publishing to VS Code Marketplace..."
+          vsce publish -p $VSCE_PAT
+
+          echo "🌍 Publishing to Open VSX..."
+          ovsx publish "$VSIX_FILE" -p $OVSX_PAT
+
+          echo "✅ Done! Published $EXT_NAME v$VERSION to both VS Code Marketplace and Open VSX."
