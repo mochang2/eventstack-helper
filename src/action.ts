@@ -6,6 +6,22 @@ import {
 } from "./eventStackManager";
 import type { FunctionInfo } from "./types";
 
+export async function manuallyAddEventStack(
+    fileUri: vscode.Uri,
+    targetFunction: FunctionInfo
+): Promise<void> {
+    const document = await vscode.workspace.openTextDocument(fileUri);
+    const { line, column } = await addEventStackToFunction(
+        document,
+        targetFunction,
+        0
+    );
+
+    const lastEventStackPosition = new vscode.Position(line + 1, column);
+    await vscode.workspace.save(fileUri);
+    await moveCursorToEventStack(fileUri, lastEventStackPosition);
+}
+
 export async function automaticallyAddEventStack(
     fileUri: vscode.Uri,
     newlyAddedFunctions: FunctionInfo[]
