@@ -55,7 +55,11 @@ function isNormalEventStackSetCall(
         "window.eventStack.set"
     );
 
-    return eventStackFunctionName.split(".").every((objectNameOrMethodName) => extracted.has(objectNameOrMethodName));
+    return eventStackFunctionName
+        .split(".")
+        .every((objectNameOrMethodName) =>
+            extracted.has(objectNameOrMethodName)
+        );
 }
 
 function checkEventStackSetPattern(functionBody: BlockStatement): boolean {
@@ -167,80 +171,75 @@ export async function getFunctions(
 
     traverse(astResult.ast, {
         // functions declared with function keyword
-        FunctionDeclaration: {
-            enter: (path) => {
-                // path.node.body.loc.start.line !== path.node.body.loc.end.line: exclude function with single line body
-                if (
-                    path.node.id?.type === "Identifier" &&
-                    path.node.loc &&
-                    path.node.body.loc &&
-                    path.node.body.loc.start.line !==
-                        path.node.body.loc.end.line
-                ) {
-                    functions.push({
-                        functionName: path.node.id.name,
-                        declarationStartPosition: {
-                            line:
-                                path.node.loc.start.line -
-                                1 +
-                                astResult.scriptStartLine,
-                            column: path.node.loc.start.column,
-                        },
-                        bodyStartPosition: {
-                            line:
-                                path.node.body.loc.start.line -
-                                1 +
-                                astResult.scriptStartLine,
-                            column: path.node.body.loc.start.column + 1,
-                        },
-                        params: extractValidParams(path.node.params),
-                        isEventStackSetExists: checkEventStackSetPattern(
-                            path.node.body
-                        ),
-                    });
-                }
-            },
+        FunctionDeclaration(path) {
+            // path.node.body.loc.start.line !== path.node.body.loc.end.line: exclude function with single line body
+            if (
+                path.node.id?.type === "Identifier" &&
+                path.node.loc &&
+                path.node.body.loc &&
+                path.node.body.loc.start.line !== path.node.body.loc.end.line
+            ) {
+                functions.push({
+                    functionName: path.node.id.name,
+                    declarationStartPosition: {
+                        line:
+                            path.node.loc.start.line -
+                            1 +
+                            astResult.scriptStartLine,
+                        column: path.node.loc.start.column,
+                    },
+                    bodyStartPosition: {
+                        line:
+                            path.node.body.loc.start.line -
+                            1 +
+                            astResult.scriptStartLine,
+                        column: path.node.body.loc.start.column + 1,
+                    },
+                    params: extractValidParams(path.node.params),
+                    isEventStackSetExists: checkEventStackSetPattern(
+                        path.node.body
+                    ),
+                });
+            }
         },
         // functions declared with const / var / let
-        VariableDeclarator: {
-            enter: (path) => {
-                // path.node.init.body.type === "BlockStatement": exclude arrow function without expression body
-                // path.node.init.body.loc.start.line !== path.node.init.body.loc.end.line: exclude arrow function with single line body
-                if (
-                    path.node.id.type === "Identifier" &&
-                    path.node.init?.type === "ArrowFunctionExpression" &&
-                    path.node.init.body.type === "BlockStatement" &&
-                    path.node.loc &&
-                    path.node.init.body.loc &&
-                    path.node.init.body.loc.start.line !==
-                        path.node.init.body.loc.end.line
-                ) {
-                    functions.push({
-                        functionName: path.node.id.name,
-                        declarationStartPosition: {
-                            line:
-                                path.node.loc.start.line -
-                                1 +
-                                astResult.scriptStartLine,
-                            column: path.node.loc.start.column,
-                        },
-                        bodyStartPosition: {
-                            line:
-                                path.node.init.body.loc.start.line -
-                                1 +
-                                astResult.scriptStartLine,
-                            column: path.node.init.body.loc.start.column + 1,
-                        },
-                        params: extractValidParams(path.node.init.params),
-                        isEventStackSetExists: checkEventStackSetPattern(
-                            path.node.init.body
-                        ),
-                    });
-                }
-            },
+        VariableDeclarator(path) {
+            // path.node.init.body.type === "BlockStatement": exclude arrow function without expression body
+            // path.node.init.body.loc.start.line !== path.node.init.body.loc.end.line: exclude arrow function with single line body
+            if (
+                path.node.id.type === "Identifier" &&
+                path.node.init?.type === "ArrowFunctionExpression" &&
+                path.node.init.body.type === "BlockStatement" &&
+                path.node.loc &&
+                path.node.init.body.loc &&
+                path.node.init.body.loc.start.line !==
+                    path.node.init.body.loc.end.line
+            ) {
+                functions.push({
+                    functionName: path.node.id.name,
+                    declarationStartPosition: {
+                        line:
+                            path.node.loc.start.line -
+                            1 +
+                            astResult.scriptStartLine,
+                        column: path.node.loc.start.column,
+                    },
+                    bodyStartPosition: {
+                        line:
+                            path.node.init.body.loc.start.line -
+                            1 +
+                            astResult.scriptStartLine,
+                        column: path.node.init.body.loc.start.column + 1,
+                    },
+                    params: extractValidParams(path.node.init.params),
+                    isEventStackSetExists: checkEventStackSetPattern(
+                        path.node.init.body
+                    ),
+                });
+            }
         },
         // functions declared inside an object are not included
-        // ObjectExpression: {},
+        // ObjectExpression(path) {},
     });
 
     functions.sort(
