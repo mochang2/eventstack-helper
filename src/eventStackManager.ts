@@ -3,7 +3,7 @@ import * as path from "path";
 import { minimatch } from "minimatch";
 import type { Position, FunctionInfo } from "./types";
 
-function shouldProcessFunctions(
+export function shouldProcessFunctions(
     fileUri: vscode.Uri,
     newlyAddedFunctions: FunctionInfo[]
 ): boolean {
@@ -13,7 +13,7 @@ function shouldProcessFunctions(
     }
 
     const config = vscode.workspace.getConfiguration("eventstack-helper");
-    
+
     const isAutoAddEventStackEnabled = config.get<boolean>(
         "autoAddEventStack",
         true
@@ -30,10 +30,10 @@ function shouldProcessFunctions(
         ? vscode.workspace.asRelativePath(fileUri, false)
         : fileUri.fsPath;
 
-    const isFileAllowed = allowedPatterns.some((pattern) => 
+    const isFileAllowed = allowedPatterns.some((pattern) =>
         minimatch(filePathRelativeToWorkspaceRoot, pattern)
     );
-    
+
     return isFileAllowed;
 }
 
@@ -95,7 +95,9 @@ function formatEventStackCode(
     const fileName = path.basename(fileFullPath);
 
     return params.length > 0
-        ? `\n${indentation}${eventStackFunctionName}("function", "${functionName}(${fileName})", ${params.join(", ")});`
+        ? `\n${indentation}${eventStackFunctionName}("function", "${functionName}(${fileName})", ${params.join(
+              ", "
+          )});`
         : `\n${indentation}${eventStackFunctionName}("function", "${functionName}(${fileName})");`;
 }
 
@@ -128,7 +130,7 @@ export async function addEventStackToFunction(
     return functionInfo.bodyStartPosition.line + lineAdjustment;
 }
 
-async function moveCursorToEventStack(
+export async function moveCursorToEventStack(
     fileUri: vscode.Uri,
     position: vscode.Position
 ): Promise<void> {
@@ -152,37 +154,5 @@ async function moveCursorToEventStack(
         const selection = new vscode.Selection(position, position);
         editor.selection = selection;
         editor.revealRange(selection, vscode.TextEditorRevealType.InCenter);
-    }
-}
-
-export async function automaticallyAddEventStack(
-    fileUri: vscode.Uri,
-    newlyAddedFunctions: FunctionInfo[]
-): Promise<void> {
-    if (!shouldProcessFunctions(fileUri, newlyAddedFunctions)) {
-        return;
-    }
-
-    const functionsToAddEventStack = newlyAddedFunctions.filter(
-        ({ isEventStackSetExists }) => !isEventStackSetExists
-    );
-    const document = await vscode.workspace.openTextDocument(fileUri);
-    let addedFunctionCount = 0;
-    let lastEventStackPosition: vscode.Position | null = null;
-
-    for (const functionInfo of functionsToAddEventStack) {
-        const eventStackLine = await addEventStackToFunction(
-            document,
-            functionInfo,
-            addedFunctionCount
-        );
-        lastEventStackPosition = new vscode.Position(eventStackLine + 1, 0);
-        addedFunctionCount++;
-    }
-
-    await vscode.workspace.save(fileUri);
-    if (lastEventStackPosition) {
-        // move cursor to the last event stack position
-        await moveCursorToEventStack(fileUri, lastEventStackPosition);
     }
 }
