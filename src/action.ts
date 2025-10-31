@@ -22,12 +22,12 @@ export async function automaticallyAddEventStack(
     let lastEventStackPosition: vscode.Position | null = null;
 
     for (const functionInfo of functionsToAddEventStack) {
-        const eventStackLine = await addEventStackToFunction(
+        const { line, column } = await addEventStackToFunction(
             document,
             functionInfo,
             addedFunctionCount
         );
-        lastEventStackPosition = new vscode.Position(eventStackLine + 1, 0);
+        lastEventStackPosition = new vscode.Position(line + 1, column);
         addedFunctionCount++;
     }
 

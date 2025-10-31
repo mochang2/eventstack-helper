@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
+import { automaticallyAddEventStack } from "./action";
 import { FunctionTracker } from "./functionTracker";
-import { automaticallyAddEventStack } from "./eventStackManager";
 
 // tests not described in the fixtures
 // - When changing the name of the function, it should be added if there is no event stack because it is recognized as a new function

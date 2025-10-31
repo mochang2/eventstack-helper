@@ -106,7 +106,7 @@ export async function addEventStackToFunction(
     document: vscode.TextDocument,
     functionInfo: FunctionInfo,
     lineAdjustment: number
-): Promise<number> {
+): Promise<{line: number, column: number}> {
     const indentation = calculateIndentation(
         document,
         functionInfo.declarationStartPosition,
@@ -127,7 +127,10 @@ export async function addEventStackToFunction(
 
     await vscode.workspace.applyEdit(edit);
 
-    return functionInfo.bodyStartPosition.line + lineAdjustment;
+    return {
+        line: functionInfo.bodyStartPosition.line + lineAdjustment,
+        column: eventStackCode.length,
+    };
 }
 
 export async function moveCursorToEventStack(
