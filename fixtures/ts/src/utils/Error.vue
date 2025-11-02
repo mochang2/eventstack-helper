@@ -4,7 +4,7 @@
     <!-- < -->
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 // [TEST] normally not execute in files with parsing errors inside the script tag
 
 const aa "fdf";
