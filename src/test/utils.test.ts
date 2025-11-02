@@ -16,3 +16,38 @@ export async function waitForLoadingExtension() {
 export async function sleep(ms: number = 200) {
     await new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export async function insert(fileUri: vscode.Uri, emptyPosition: vscode.Position, code: string) {
+        const edit = new vscode.WorkspaceEdit();
+        edit.insert(fileUri, emptyPosition, code);
+        await vscode.workspace.applyEdit(edit);
+    }
+
+export async function remove(fileUri: vscode.Uri, document: vscode.TextDocument, code: string) {
+    const text = document.getText();
+    const startOffset = text.indexOf(code);
+    const endOffset = startOffset + code.length;
+
+    const edit = new vscode.WorkspaceEdit();
+    edit.delete(fileUri, new vscode.Range(
+        document.positionAt(startOffset),
+        document.positionAt(endOffset)
+    ));
+    await vscode.workspace.applyEdit(edit);
+}
+
+export async function createDocument(filePath: string): Promise<vscode.Uri> {
+    await vscode.workspace.fs.writeFile(vscode.Uri.file(filePath), new TextEncoder().encode(""));
+    
+    return vscode.Uri.file(filePath);
+}
+
+export async function deleteDocument(fileUri: vscode.Uri): Promise<void> {
+    await vscode.workspace.fs.delete(fileUri);
+}
+
+export async function renameDocument(oldFilePath: string, newFilePath: string): Promise<vscode.Uri> {
+    await vscode.workspace.fs.rename(vscode.Uri.file(oldFilePath), vscode.Uri.file(newFilePath));
+    
+    return vscode.Uri.file(newFilePath);
+}

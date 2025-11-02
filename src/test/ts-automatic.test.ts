@@ -1,46 +1,82 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import * as path from "path";
-import { waitForLoadingExtension } from "./utils.test";
+import {
+    waitForLoadingExtension,
+    sleep,
+    insert,
+    remove,
+    createDocument,
+    deleteDocument,
+    renameDocument,
+} from "./utils.test";
 
 suite("ts basic", () => {
-    let workspaceRoot: string = "";
+let workspaceRoot: string = "";
 
     suiteSetup(() => {
         workspaceRoot = path.resolve(__dirname, "../../fixtures/ts");
     });
 
     suite("App.vue", () => {
-        async function getDocument(): Promise<vscode.TextDocument> {
-            const targetFileUri = vscode.Uri.file(
-                path.join(workspaceRoot, "src/App.vue")
-            );
-
-            return vscode.workspace.openTextDocument(targetFileUri);
-        }
-
-        test("Adding a new named arrow function with parameters automatically adds event stack", async () => {
+        test("Adding a new named arrow function with parameters automatically inserts event stack", async () => {
             // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 const externalArrowFunctionWithParameters = (
-  param1: any,
-  param2: any, 
-  { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }: any, 
-  [arrayElement, ...restArrayElement]: any,
-  ...rest: any
+  param1,
+  param2, 
+  { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }, 
+  [arrayElement, ...restArrayElement],
+  ...rest
 ) => {
   console.log("externalArrowFunction called");
 };
-`;
-        });
+`
+            ;
+        
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+  
+            // then
+            const expectedCode = `
+const externalArrowFunctionWithParameters = (
+  param1,
+  param2, 
+  { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }, 
+  [arrayElement, ...restArrayElement],
+  ...rest
+) => {
+  window.eventStack.set("function", "externalArrowFunctionWithParameters(Automatic.vue)", param1, param2, object, differentNameKey, arrayElement);
+  console.log("externalArrowFunction called");
+};
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+  
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
+          });
 
-        test("Adding a new named arrow function which is declared in another arrow function automatically adds event stack", async () => {
+        test("Adding a new named arrow function which is declared in another arrow function automatically inserts event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 const externalArrowFunctionWithParameters = (
   param1: any,
@@ -55,24 +91,87 @@ const externalArrowFunctionWithParameters = (
     console.log("innerFunction called");
   };
 };
-`;
+`
+            ;
+        
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+  
+            // then
+            const expectedCode = `
+const externalArrowFunctionWithParameters = (
+  param1: any,
+  param2: any, 
+  { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }: any, 
+  [arrayElement, ...restArrayElement]: any,
+  ...rest: any
+) => {
+  window.eventStack.set("function", "externalArrowFunctionWithParameters(Automatic.vue)", param1, param2, object, differentNameKey, arrayElement);
+  console.log("externalArrowFunction called");
+
+  const innerFunction = () => {
+    window.eventStack.set("function", "innerFunction(Automatic.vue)");
+    console.log("innerFunction called");
+  };
+};
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+  
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new named arrow function without parameters automatically adds event stack", async () => {
+        test("Adding a new named arrow function without parameters automatically inserts event stack", async () => {
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 const externalArrowFunctionWithoutParameters = () => {
   console.log("externalArrowFunctionWithoutParameters called");
 };
-`;
+`
+            ;
+        
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+  
+            // then
+            const expectedCode = `
+const externalArrowFunctionWithoutParameters = () => {
+  window.eventStack.set("function", "externalArrowFunctionWithoutParameters(Automatic.vue)");
+  console.log("externalArrowFunctionWithoutParameters called");
+};
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+  
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new named normal function with parameters automatically adds event stack", async () => {
+        test("Adding a new named normal function with parameters automatically inserts event stack", async () => {
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 function externalNormalFunctionWithParameters(
   param1: any,
@@ -83,13 +182,45 @@ function externalNormalFunctionWithParameters(
 ) {
   console.log("normalFunction called");
 };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+function externalNormalFunctionWithParameters(
+  param1: any,
+  param2: any, 
+  { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }: any, 
+  [arrayElement, ...restArrayElement]: any,
+  ...rest: any
+) {
+  window.eventStack.set("function", "externalNormalFunctionWithParameters(Automatic.vue)", param1, param2, object, differentNameKey, arrayElement);
+  console.log("normalFunction called");
+};
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new named normal function which is declared in another normal function automatically adds event stack", async () => {
+        test("Adding a new named normal function which is declared in another normal function automatically inserts event stack", async () => {
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 function externalNormalFunctionWithParameters(
   param1: any,
@@ -104,184 +235,656 @@ function externalNormalFunctionWithParameters(
     console.log("innerFunction called");
   }
 };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            const expectedCode = `
+function externalNormalFunctionWithParameters(
+  param1: any,
+  param2: any, 
+  { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }: any, 
+  [arrayElement, ...restArrayElement]: any,
+  ...rest: any
+) {
+  window.eventStack.set("function", "externalNormalFunctionWithParameters(Automatic.vue)", param1, param2, object, differentNameKey, arrayElement);
+  console.log("normalFunction called");
+
+  function innerFunction() {
+    window.eventStack.set("function", "innerFunction(Automatic.vue)");
+    console.log("innerFunction called");
+  }
+};
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new named normal function without parameters automatically adds event stack", async () => {
+        test("Adding a new named normal function without parameters automatically inserts event stack", async () => {
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 function externalNormalFunctionWithoutParameters() {
   console.log("normalFunction called");
 };
-`;
+` 
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+function externalNormalFunctionWithoutParameters() {
+  window.eventStack.set("function", "externalNormalFunctionWithoutParameters(Automatic.vue)");
+  console.log("normalFunction called");
+};
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new variable does not automatically add event stack", async () => {
+        test("Adding a new variable does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 const commonVariable: string = "This is var1";
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new ref variable does not automatically add event stack", async () => {
+        test("Adding a new ref variable does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 const commonRef = ref<number>(0);
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new function assigned to a variable does not automatically add event stack", async () => {
+        test("Adding a new function assigned to a variable does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+            
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 const variableFunction = function aa(): void {
   console.log("variableFunction called");
 };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new computed property does not automatically add event stack", async () => {
+        test("Adding a new computed property does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 const computedValue = computed<number>(() => {
   return 1;
 });
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new function without body does not automatically add event stack", async () => {
+        test("Adding a new function without body does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             let functionCode = `
 const oneLineArrowFunctionWithoutBody = () => "aa";
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            let notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 const multiLineArrowFunctionWithoutBody = () => ({
   aa: "aa",
 });
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 const multiLineNestedArrowFunctionWithoutBody = () => ({
   aa: () => ({
     bb: "bb",
   })
 });
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new one line function with body does not automatically add event stack", async () => {
+        test("Adding a new one line function with body does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             let functionCode = `
 function oneLineNormalFunctionWithBody() { console.log("oneLineNormalFunctionWithBody called"); }
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            let notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 const oneLineArrowFunctionWithBody = () => { console.log("oneLineArrowFunctionWithBody called"); };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new function that already has event stack does not automatically add event stack", async () => {
+        test("Adding a new function that already has event stack does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             let functionCode = `
 function functionWithEventStack1() {
   (window as any).eventStack.set("function", "functionWithEventStack1");
 };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            let notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 function functionWithEventStack2() {
   (window as any)?.eventStack.set("function", "functionWithEventStack2");
 };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 function functionWithEventStack3() {
   (window as any)!.eventStack.set("function", "functionWithEventStack3");
 };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 function functionWithEventStack4() {
   (window as any).eventStack?.set("function", "functionWithEventStack4");
 };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 function functionWithEventStack5() {
   (window as any).eventStack!.set("function", "functionWithEventStack5");
 };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 function functionWithEventStack6() {
   (window as any)?.eventStack!.set("function", "functionWithEventStack6");
 };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 function functionWithEventStack7() {
   (window as any)!.eventStack?.set("function", "functionWithEventStack7");
 };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 function functionWithEventStack8() {
   (window as any)?.eventStack?.set("function", "functionWithEventStack8");
 };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
 function functionWithEventStack9() {
   (window as any)!.eventStack!.set("function", "functionWithEventStack9");
 };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new IIFE does not automatically add event stack", async () => {
+        test("Adding a new IIFE does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 (function iifeFunction() {
   console.log("iifeFunction called");
 });
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new object does not automatically add event stack", async () => {
+        test("Adding a new object does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/views/Automatic.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 const object = {
   arrowFunction: () => {
@@ -299,23 +902,39 @@ const object = {
     },
   },
 };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
     });
 
-    suite("useBanner.ts", () => {
-        async function getDocument(): Promise<vscode.TextDocument> {
-            const targetFileUri = vscode.Uri.file(
-                path.join(workspaceRoot, "src/compositions/useBanner.ts")
-            );
-
-            return vscode.workspace.openTextDocument(targetFileUri);
-        }
-
-        test("Adding a new named arrow function with parameters automatically adds event stack", async () => {
+    suite("automatic.ts", () => {
+        test("Adding a new named arrow function with parameters automatically inserts event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   const externalArrowFunctionWithParameters = (
     param1: any,
@@ -326,13 +945,46 @@ const object = {
   ) => {
     console.log("externalArrowFunction called");
   };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+  const externalArrowFunctionWithParameters = (
+    param1: any,
+    param2: any, 
+    { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }: any, 
+    [arrayElement, ...restArrayElement]: any,
+    ...rest: any
+  ) => {
+    window.eventStack.set("function", "externalArrowFunctionWithParameters(automatic.ts)", param1, param2, object, differentNameKey, arrayElement);
+    console.log("externalArrowFunction called");
+  };
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new named arrow function which is declared in another arrow function automatically adds event stack", async () => {
+        test("Adding a new named arrow function which is declared in another arrow function automatically inserts event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   const externalArrowFunctionWithParameters = (
     param1: any,
@@ -343,29 +995,93 @@ const object = {
   ) => {
     console.log("externalArrowFunction called");
 
-    // [TEST] normally execute with an inner arrow function
     const innerFunction = () => {
       console.log("innerFunction called");
     };
   };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+  const externalArrowFunctionWithParameters = (
+    param1: any,
+    param2: any, 
+    { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }: any, 
+    [arrayElement, ...restArrayElement]: any,
+    ...rest: any
+  ) => {
+    window.eventStack.set("function", "externalArrowFunctionWithParameters(automatic.ts)", param1, param2, object, differentNameKey, arrayElement);
+    console.log("externalArrowFunction called");
+
+    const innerFunction = () => {
+      window.eventStack.set("function", "innerFunction(automatic.ts)");
+      console.log("innerFunction called");
+    };
+  };
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new named arrow function without parameters automatically adds event stack", async () => {
+        test("Adding a new named arrow function without parameters automatically inserts event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   const externalArrowFunctionWithoutParameters = () => {
     console.log("externalArrowFunctionWithoutParameters called");
   };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+  const externalArrowFunctionWithoutParameters = () => {
+    window.eventStack.set("function", "externalArrowFunctionWithoutParameters(automatic.ts)");
+    console.log("externalArrowFunctionWithoutParameters called");
+  };
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new named normal function with parameters automatically adds event stack", async () => {
+        test("Adding a new named normal function with parameters automatically inserts event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   function externalNormalFunctionWithParameters(
     param1: any,
@@ -376,13 +1092,46 @@ const object = {
   ) {
     console.log("normalFunction called");
   };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+  function externalNormalFunctionWithParameters(
+    param1: any,
+    param2: any, 
+    { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }: any, 
+    [arrayElement, ...restArrayElement]: any,
+    ...rest: any
+  ) {
+    window.eventStack.set("function", "externalNormalFunctionWithParameters(automatic.ts)", param1, param2, object, differentNameKey, arrayElement);
+    console.log("normalFunction called");
+  };
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new named normal function which is declared in another normal function automatically adds event stack", async () => {
+        test("Adding a new named normal function which is declared in another normal function automatically inserts event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   function externalNormalFunctionWithParameters(
     param1: any,
@@ -397,184 +1146,658 @@ const object = {
       console.log("innerFunction called");
     }
   };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+  function externalNormalFunctionWithParameters(
+    param1: any,
+    param2: any, 
+    { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }: any, 
+    [arrayElement, ...restArrayElement]: any,
+    ...rest: any
+  ) {
+    window.eventStack.set("function", "externalNormalFunctionWithParameters(automatic.ts)", param1, param2, object, differentNameKey, arrayElement);
+    console.log("normalFunction called");
+
+    function innerFunction() {
+      window.eventStack.set("function", "innerFunction(automatic.ts)");
+      console.log("innerFunction called");
+    }
+  };
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new named normal function without parameters automatically adds event stack", async () => {
+        test("Adding a new named normal function without parameters automatically inserts event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   function externalNormalFunctionWithoutParameters() {
     console.log("normalFunction called");
   };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+  function externalNormalFunctionWithoutParameters() {
+    window.eventStack.set("function", "externalNormalFunctionWithoutParameters(automatic.ts)");
+    console.log("normalFunction called");
+  };
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await remove(fileUri, document, expectedCode);
+            await document.save();
         });
 
-        test("Adding a new variable does not automatically add event stack", async () => {
+        test("Adding a new variable does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   const commonVariable: string = "This is var1";
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new ref variable does not automatically add event stack", async () => {
+        test("Adding a new ref variable does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   const commonRef = ref<number>(0);
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new function assigned to a variable does not automatically add event stack", async () => {
+        test("Adding a new function assigned to a variable does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+            
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   const variableFunction = function aa(): void {
     console.log("variableFunction called");
   };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new computed property does not automatically add event stack", async () => {
+        test("Adding a new computed property does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   const computedValue = computed<number>(() => {
     return 1;
   });
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new function without body does not automatically add event stack", async () => {
+        test("Adding a new function without body does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             let functionCode = `
   const oneLineArrowFunctionWithoutBody = () => "aa";
-`;
-            // TEST
+`
+            ;
 
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            let notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   const multiLineArrowFunctionWithoutBody = () => ({
     aa: "aa",
   });
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   const multiLineNestedArrowFunctionWithoutBody = () => ({
     aa: () => ({
       bb: "bb",
     })
   });
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new one line function with body does not automatically add event stack", async () => {
+        test("Adding a new one line function with body does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             let functionCode = `
   function oneLineNormalFunctionWithBody() { console.log("oneLineNormalFunctionWithBody called"); }
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            // then
+            let notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   const oneLineArrowFunctionWithBody = () => { console.log("oneLineArrowFunctionWithBody called"); };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new function that already has event stack does not automatically add event stack", async () => {
+        test("Adding a new function that already has event stack does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             let functionCode = `
   function functionWithEventStack1() {
     (window as any).eventStack.set("function", "functionWithEventStack1");
   };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+            
+            // then
+            let notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
 
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   function functionWithEventStack2() {
     (window as any)?.eventStack.set("function", "functionWithEventStack2");
   };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+            
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
 
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   function functionWithEventStack3() {
     (window as any)!.eventStack.set("function", "functionWithEventStack3");
   };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+            
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
 
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   function functionWithEventStack4() {
     (window as any).eventStack?.set("function", "functionWithEventStack4");
   };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+            
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
 
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   function functionWithEventStack5() {
     (window as any).eventStack!.set("function", "functionWithEventStack5");
   };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+            
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
 
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   function functionWithEventStack6() {
     (window as any)?.eventStack!.set("function", "functionWithEventStack6");
   };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+            
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
 
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   function functionWithEventStack7() {
     (window as any)!.eventStack?.set("function", "functionWithEventStack7");
   };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+            
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
 
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   function functionWithEventStack8() {
     (window as any)?.eventStack?.set("function", "functionWithEventStack8");
   };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+            
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
 
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
+
+            // next test
             functionCode = `
   function functionWithEventStack9() {
     (window as any)!.eventStack!.set("function", "functionWithEventStack9");
   };
-`;
-            // TEST
+`
+            ;
+            
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+            
+            // then
+            notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new IIFE does not automatically add event stack", async () => {
+        test("Adding a new IIFE does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   (function iifeFunction() {
     console.log("iifeFunction called");
   });
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new object does not automatically add event stack", async () => {
+        test("Adding a new object does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   const object = {
     arrowFunction: () => {
@@ -592,223 +1815,668 @@ const object = {
       },
     },
   };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new function returned from a function does not automatically add event stack", async () => {
+        test("Adding a new function returned from a function does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   return function returnedFunction() {
 
   };
-`;
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set(
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("When changing the name of the function, it should be added if there is no event stack", async () => {
+        test("When changing the name of the function, it should be inserted if there is no event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
             const oldFunctionName = "useBanner";
             const newFunctionName = "useBanner2";
+
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/compositions/automatic.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const originalText = document.getText();
+
+            // when
+            {
+                const edit = new vscode.WorkspaceEdit();
+                edit.replace(
+                    fileUri,
+                    new vscode.Range(
+                        document.positionAt(0),
+                        document.positionAt(document.getText().length)
+                    ),
+                    originalText.replace(oldFunctionName, newFunctionName)
+                );
+                await vscode.workspace.applyEdit(edit);
+            }
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+  window.eventStack.set("function", "useBanner2(automatic.ts)");
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+            
+            // clean up
+            {
+                const edit = new vscode.WorkspaceEdit();
+                edit.replace(
+                    fileUri,
+                    new vscode.Range(
+                        document.positionAt(0),
+                        document.positionAt(document.getText().length)
+                    ),
+                    originalText
+                );
+                await vscode.workspace.applyEdit(edit);
+            }
+            await document.save(); // eventStack re-add
+            await sleep(200); // wait for extension to process
+
+            {
+                const edit = new vscode.WorkspaceEdit();
+                edit.replace(
+                    fileUri,
+                    new vscode.Range(
+                        document.positionAt(0),
+                        document.positionAt(document.getText().length)
+                    ),
+                    originalText
+                );
+                await vscode.workspace.applyEdit(edit);
+            }
+            await document.save();
         });
     });
 
     suite("Error.vue", () => {
-        async function getDocument(): Promise<vscode.TextDocument> {
-            const targetFileUri = vscode.Uri.file(
-                path.join(workspaceRoot, "src/views/Error.vue")
+        test("Adding a new function in a file with parsing errors inside the script tag does not automatically insert event stack", async () => {
+            // given
+            await waitForLoadingExtension();
+
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/utils/Error.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(10, 0);
+            const functionCode = `
+function newFunction(): void {
+  console.log("newFunction called");
+}
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set("function", "newFunction(Error.vue)");
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
             );
 
-            return vscode.workspace.openTextDocument(targetFileUri);
-        }
-
-        test("Adding a new function in a file with parsing errors inside the script tag does not automatically add event stack", async () => {
-            await waitForLoadingExtension();
-
-            const document = await getDocument();
-            const functionCode = `
-function zxcv() {
-    console.log("zxcv called");
-}
-`;
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new function in a file with parsing errors at the time when the parsing errors are fixed does not automatically add event stack", async () => {
+        test("Adding a new function in a file with parsing errors at the time when the parsing errors are fixed does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/utils/Error.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+            const originalText = document.getText();
+
             const deleteCode = `
 const aa "fdf";
-`;
+`
+            ;
             const functionCode = `
-function zxcv() {
-    console.log("zxcv called");
+function newFunction(): void {
+  console.log("newFunction called");
 }
-`;
-            // save action
+`
+            ;
+
+            // when
+            {
+                const edit = new vscode.WorkspaceEdit();
+                edit.replace(
+                  fileUri,
+                  new vscode.Range(
+                    document.positionAt(document.getText().indexOf(deleteCode)),
+                    document.positionAt(document.getText().indexOf(deleteCode) + deleteCode.length)
+                  ),
+                  functionCode,
+                );
+                await vscode.workspace.applyEdit(edit);
+            }
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set("function", "newFunction(Error.vue)");
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            {
+                const edit = new vscode.WorkspaceEdit();
+                edit.replace(
+                  fileUri,
+                  new vscode.Range(
+                    document.positionAt(0),
+                    document.positionAt(document.getText().length)
+                  ),
+                  originalText,
+                );
+                await vscode.workspace.applyEdit(edit);
+            }
+            await document.save();
         });
 
         test("Adding a new function in a file with parsing errors after the parsing errors are fixed automatically adds event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/utils/Error.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+            const originalText = document.getText();
+
+            // when
             const deleteCode = `
 const aa "fdf";
-`;
-            // save action
+`
+            ;
+            await remove(fileUri, document, deleteCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            const emptyPosition = new vscode.Position(10, 0);
             const functionCode = `
-function zxcv() {
-    console.log("zxcv called");
+function newFunction(): void {
+  console.log("newFunction called");
 }
-`;
+`
+            ;
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+function newFunction(): void {
+  window.eventStack.set("function", "newFunction(Error.vue)");
+  console.log("newFunction called");
+}
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            const edit = new vscode.WorkspaceEdit();
+            edit.replace(
+                fileUri,
+                new vscode.Range(
+                    document.positionAt(0),
+                    document.positionAt(document.getText().length)
+                ),
+                originalText
+            );
+            await vscode.workspace.applyEdit(edit);
+            await document.save();
         });
 
-        test("Adding a new function in a file with parsing errors inside the template tag automatically adds event stack", async () => {
+        test("Adding a new function in a file with parsing errors inside the template tag automatically inserts event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/utils/Error.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+            const originalText = document.getText();
+            
             const deleteCode = `
 const aa "fdf";
-`;
-            // save action
+`
+            ;
+          
+            await remove(fileUri, document, deleteCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+          // when
             const errorCode = `
     <
-`;
+`
+            ;
+            await insert(fileUri, new vscode.Position(2, 0), errorCode);
+
             const functionCode = `
-function zxcv() {
-    console.log("zxcv called");
+function newFunction(): void {
+  console.log("newFunction called");
 }
-`;
-        });
+`
+            ;
+            await insert(fileUri, new vscode.Position(10, 0), functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+function newFunction(): void {
+  window.eventStack.set("function", "newFunction(Error.vue)");
+  console.log("newFunction called");
+}
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            const edit = new vscode.WorkspaceEdit();
+            edit.replace(
+                fileUri,
+                new vscode.Range(
+                    document.positionAt(0),
+                    document.positionAt(document.getText().length)
+                ),
+                originalText
+            );
+            await vscode.workspace.applyEdit(edit);
+            await document.save();
+      });
     });
 
     suite("error.ts", () => {
-        async function getDocument(): Promise<vscode.TextDocument> {
-            const targetFileUri = vscode.Uri.file(
-                path.join(workspaceRoot, "src/utils/error.ts")
+        test("Adding a new function in a file with parsing errors does not automatically insert event stack", async () => {
+            // given
+            await waitForLoadingExtension();
+
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/utils/error.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(3, 0);
+            const functionCode = `
+function newFunction() {
+  console.log("newFunction called");
+}
+`
+            ;
+
+            // when
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set("function", "newFunction(error.ts)");
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
             );
 
-            return vscode.workspace.openTextDocument(targetFileUri);
-        }
-
-        test("Adding a new function in a file with parsing errors does not automatically add event stack", async () => {
-            await waitForLoadingExtension();
-
-            const document = await getDocument();
-            const functionCode = `
-function zxcv() {
-    console.log("zxcv called");
-}
-`;
+            // clean up
+            await remove(fileUri, document, functionCode);
+            await document.save();
         });
 
-        test("Adding a new function in a file with parsing errors at the time when the parsing errors are fixed does not automatically add event stack", async () => {
+        test("Adding a new function in a file with parsing errors at the time when the parsing errors are fixed does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/utils/error.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+            const originalText = document.getText();
+
             const deleteCode = `
 const aa "fdf";
-`;
+`
+            ;
             const functionCode = `
-function zxcv() {
-    console.log("zxcv called");
+function newFunction() {
+  console.log("newFunction called");
 }
-`;
-            // save action
+`
+            ;
+            // when
+            {
+                const edit = new vscode.WorkspaceEdit();
+                edit.replace(
+                  fileUri,
+                  new vscode.Range(
+                    document.positionAt(document.getText().indexOf(deleteCode)),
+                    document.positionAt(document.getText().indexOf(deleteCode) + deleteCode.length)
+                  ),
+                  functionCode,
+                );
+                await vscode.workspace.applyEdit(edit);
+            }
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const notExpectedCode = `
+  window.eventStack.set("function", "newFunction(error.ts)");
+`
+            ;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            {
+                const edit = new vscode.WorkspaceEdit();
+                edit.replace(
+                  fileUri,
+                  new vscode.Range(
+                    document.positionAt(0),
+                    document.positionAt(document.getText().length)
+                  ),
+                  originalText,
+                );
+                await vscode.workspace.applyEdit(edit);
+            }
+            await document.save();
         });
 
-        test("Adding a new function in a file with parsing errors after the parsing errors are fixed automatically adds event stack", async () => {
+        test("Adding a new function in a file with parsing errors after the parsing errors are fixed automatically inserts event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await getDocument();
+            const fileUri = vscode.Uri.file(path.join(workspaceRoot, "src/utils/error.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+            const originalText = document.getText();
+
+            // when
             const deleteCode = `
 const aa "fdf";
-`;
-            // save action
+`
+            ;
+            await remove(fileUri, document, deleteCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
 
+            const emptyPosition = new vscode.Position(3, 0);
             const functionCode = `
-function zxcv() {
-    console.log("zxcv called");
+function newFunction() {
+  console.log("newFunction called");
 }
-`;
+`
+            ;
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+function newFunction() {
+  window.eventStack.set("function", "newFunction(error.ts)");
+  console.log("newFunction called");
+}
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            const edit = new vscode.WorkspaceEdit();
+            edit.replace(
+                fileUri,
+                new vscode.Range(
+                    document.positionAt(0),
+                    document.positionAt(document.getText().length)
+                ),
+                originalText
+            );
+            await vscode.workspace.applyEdit(edit);
+            await document.save();
         });
     });
 
     suite("New.vue", () => {
-        async function createDocument(): Promise<vscode.TextDocument> {
-            const filePath = path.join(workspaceRoot, "src/views/New.vue");
-            await vscode.workspace.fs.writeFile(vscode.Uri.file(filePath), new TextEncoder().encode(""));
-            const targetFileUri = vscode.Uri.file(filePath);
-
-            return vscode.workspace.openTextDocument(targetFileUri);
-        }
-
-        async function renameDocument(): Promise<vscode.TextDocument> {
-            const oldFilePath = path.join(workspaceRoot, "src/views/New.vue");
-            const newFilePath = path.join(workspaceRoot, "src/views/New2.vue");
-            await vscode.workspace.fs.rename(vscode.Uri.file(oldFilePath), vscode.Uri.file(newFilePath));
-            const targetFileUri = vscode.Uri.file(newFilePath);
-
-            return vscode.workspace.openTextDocument(targetFileUri);
-        }
-
-        test("Adding a new function in a new file automatically adds event stack", async () => {
+        test("Adding a new function in a new file automatically inserts event stack", async () => {
             await waitForLoadingExtension();
 
-            const document = await createDocument();
+            const fileUri = await createDocument(path.join(workspaceRoot, "src/views/New.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(0, 0);
             const functionCode = `
-function newFunction() {
+<template>
+    <div></div>
+</template>
+
+<script lang="ts" setup>
+function newFunction(): void {
   console.log("newFunction called");
 }
-`;
+</script>
+`
+            ;
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+function newFunction(): void {
+  window.eventStack.set("function", "newFunction(New.vue)");
+  console.log("newFunction called");
+}
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await deleteDocument(fileUri);
+            await sleep(200); // wait for document to be deleted
         });
 
-        test("When renaming a file, the function information from the previous file is moved to the new file, that is, it does not automatically add event stack", async () => {
-          await waitForLoadingExtension();
+        test("When renaming a file, the function information from the previous file is moved to the new file, that is, it does not automatically insert event stack", async () => {
+            // given
+            await waitForLoadingExtension();
 
-          await createDocument();
-          const document = await renameDocument();
-      });
+            const fileUri = await createDocument(path.join(workspaceRoot, "src/views/New2.vue"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(0, 0);
+            const functionCode = `
+<template>
+    <div></div>
+</template>
+
+<script lang="ts" setup>
+  function newFunction(): void {
+  console.log("newFunction called");
+}
+</script>
+`
+            ;
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            const deleteCode = `window.eventStack.set("function", "newFunction(New2.vue)");`;
+            await remove(fileUri, document, deleteCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // when
+            const newFileUri = await renameDocument(path.join(workspaceRoot, "src/views/New2.vue"), path.join(workspaceRoot, "src/views/New3.vue"));
+            const newDocument = await vscode.workspace.openTextDocument(newFileUri);
+
+            // then
+            const notExpectedCode = `
+window.eventStack.set("function", "newFunction(New3.vue)");
+`
+            ;
+            assert.ok(
+                !newDocument.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await deleteDocument(newFileUri);
+            await sleep(200); // wait for document to be deleted
+        });
     });
 
     suite("new.ts", () => {
-        async function createDocument(): Promise<vscode.TextDocument> {
-            const filePath = path.join(workspaceRoot, "src/compositions/new.ts");
-            await vscode.workspace.fs.writeFile(vscode.Uri.file(filePath), new TextEncoder().encode(""));
-            const targetFileUri = vscode.Uri.file(filePath);
-
-            return vscode.workspace.openTextDocument(targetFileUri);
-        }
-
-        async function renameDocument(): Promise<vscode.TextDocument> {
-            const oldFilePath = path.join(workspaceRoot, "src/compositions/new.ts");
-            const newFilePath = path.join(workspaceRoot, "src/compositions/new2.ts");
-            await vscode.workspace.fs.rename(vscode.Uri.file(oldFilePath), vscode.Uri.file(newFilePath));
-            const targetFileUri = vscode.Uri.file(newFilePath);
-
-            return vscode.workspace.openTextDocument(targetFileUri);
-        }
-
         test("Adding a new function in a new file automatically adds event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            const document = await createDocument();
+            const fileUri = await createDocument(path.join(workspaceRoot, "src/compositions/new.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(0, 0);
             const functionCode = `
 function newFunction() {
   console.log("newFunction called");
 }
-`;
+`
+            ;
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // then
+            const expectedCode = `
+function newFunction() {
+  window.eventStack.set("function", "newFunction(new.ts)");
+  console.log("newFunction called");
+}
+`
+            ;
+            assert.ok(
+                document.getText().includes(expectedCode),
+                "eventstack is not inserted as expected"
+            );
+
+            // clean up
+            await deleteDocument(fileUri);
+            await sleep(200); // wait for document to be deleted
         });
 
-        test("When renaming a file, the function information from the previous file is moved to the new file, that is, it does not automatically add event stack", async () => {
+        test("When renaming a file, the function information from the previous file is moved to the new file, that is, it does not automatically insert event stack", async () => {
+            // given
             await waitForLoadingExtension();
 
-            await createDocument();
-            const document = await renameDocument();
+            const fileUri = await createDocument(path.join(workspaceRoot, "src/compositions/new2.ts"));
+            const document = await vscode.workspace.openTextDocument(fileUri);
+
+            const emptyPosition = new vscode.Position(0, 0);
+            const functionCode = `
+function newFunction(): void {
+  console.log("newFunction called");
+}
+`
+            ;
+            await insert(fileUri, emptyPosition, functionCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            const deleteCode = `window.eventStack.set("function", "newFunction(new2.ts)");`;
+            await remove(fileUri, document, deleteCode);
+            await document.save();
+            await sleep(200); // wait for extension to process
+
+            // when
+            const newFileUri = await renameDocument(path.join(workspaceRoot, "src/compositions/new2.ts"), path.join(workspaceRoot, "src/compositions/new3.ts"));
+            const newDocument = await vscode.workspace.openTextDocument(newFileUri);
+
+            // then
+            const notExpectedCode = `
+window.eventStack.set("function", "newFunction(new3.ts)");
+`
+            ;
+            assert.ok(
+                !newDocument.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+
+            // clean up
+            await deleteDocument(newFileUri);
+            await sleep(200); // wait for document to be deleted
         });
     });
 });
