@@ -15,7 +15,7 @@ import { ref, computed } from "vue";
 //   [arrayElement, ...restArrayElement]: any,
 //   ...rest: any
 // ) => {
-//   console.log("externalArrowFunction called");
+//   console.log("externalArrowFunctionWithParameters called");
 
 //   // [TEST] normally execute with an inner arrow function
 //   const innerFunction = () => {
@@ -36,7 +36,7 @@ import { ref, computed } from "vue";
 //   [arrayElement, ...restArrayElement]: any,
 //   ...rest: any
 // ) {
-//   console.log("normalFunction called");
+//   console.log("externalNormalFunctionWithParameters called");
 
 //   // [TEST] normally execute with an inner normal function
 //   function innerFunction() {
@@ -46,7 +46,7 @@ import { ref, computed } from "vue";
 
 // [TEST] normally execute with a normal function without parameters
 // function externalNormalFunctionWithoutParameters() {
-//   console.log("normalFunction called");
+//   console.log("externalNormalFunctionWithoutParameters called");
 // };
 
 /* ------------------------------------------------------------ */

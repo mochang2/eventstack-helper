@@ -35,7 +35,7 @@ const externalArrowFunctionWithParameters = (
   [arrayElement, ...restArrayElement],
   ...rest
 ) => {
-  console.log("externalArrowFunction called");
+  console.log("externalArrowFunctionWithParameters called");
 };
 `
             ;
@@ -55,7 +55,7 @@ const externalArrowFunctionWithParameters = (
   ...rest
 ) => {
   window.eventStack.set("function", "externalArrowFunctionWithParameters(Automatic.vue)", param1, param2, object, differentNameKey, arrayElement);
-  console.log("externalArrowFunction called");
+  console.log("externalArrowFunctionWithParameters called");
 };
 `
             ;
@@ -85,7 +85,7 @@ const externalArrowFunctionWithParameters = (
   [arrayElement, ...restArrayElement]: any,
   ...rest: any
 ) => {
-  console.log("externalArrowFunction called");
+  console.log("externalArrowFunctionWithParameters called");
 
   const innerFunction = () => {
     console.log("innerFunction called");
@@ -109,7 +109,7 @@ const externalArrowFunctionWithParameters = (
   ...rest: any
 ) => {
   window.eventStack.set("function", "externalArrowFunctionWithParameters(Automatic.vue)", param1, param2, object, differentNameKey, arrayElement);
-  console.log("externalArrowFunction called");
+  console.log("externalArrowFunctionWithParameters called");
 
   const innerFunction = () => {
     window.eventStack.set("function", "innerFunction(Automatic.vue)");
@@ -180,7 +180,7 @@ function externalNormalFunctionWithParameters(
   [arrayElement, ...restArrayElement]: any,
   ...rest: any
 ) {
-  console.log("normalFunction called");
+  console.log("externalNormalFunctionWithParameters called");
 };
 `
             ;
@@ -200,7 +200,7 @@ function externalNormalFunctionWithParameters(
   ...rest: any
 ) {
   window.eventStack.set("function", "externalNormalFunctionWithParameters(Automatic.vue)", param1, param2, object, differentNameKey, arrayElement);
-  console.log("normalFunction called");
+  console.log("externalNormalFunctionWithParameters called");
 };
 `
             ;
@@ -229,7 +229,7 @@ function externalNormalFunctionWithParameters(
   [arrayElement, ...restArrayElement]: any,
   ...rest: any
 ) {
-  console.log("normalFunction called");
+  console.log("externalNormalFunctionWithParameters called");
 
   function innerFunction() {
     console.log("innerFunction called");
@@ -252,7 +252,7 @@ function externalNormalFunctionWithParameters(
   ...rest: any
 ) {
   window.eventStack.set("function", "externalNormalFunctionWithParameters(Automatic.vue)", param1, param2, object, differentNameKey, arrayElement);
-  console.log("normalFunction called");
+  console.log("externalNormalFunctionWithParameters called");
 
   function innerFunction() {
     window.eventStack.set("function", "innerFunction(Automatic.vue)");
@@ -280,7 +280,7 @@ function externalNormalFunctionWithParameters(
             const emptyPosition = new vscode.Position(8, 0);
             const functionCode = `
 function externalNormalFunctionWithoutParameters() {
-  console.log("normalFunction called");
+  console.log("externalNormalFunctionWithoutParameters called");
 };
 ` 
             ;
@@ -294,7 +294,7 @@ function externalNormalFunctionWithoutParameters() {
             const expectedCode = `
 function externalNormalFunctionWithoutParameters() {
   window.eventStack.set("function", "externalNormalFunctionWithoutParameters(Automatic.vue)");
-  console.log("normalFunction called");
+  console.log("externalNormalFunctionWithoutParameters called");
 };
 `
             ;
@@ -943,7 +943,7 @@ window.eventStack.set(
     [arrayElement, ...restArrayElement]: any,
     ...rest: any
   ) => {
-    console.log("externalArrowFunction called");
+    console.log("externalArrowFunctionWithParameters called");
   };
 `
             ;
@@ -963,7 +963,7 @@ window.eventStack.set(
     ...rest: any
   ) => {
     window.eventStack.set("function", "externalArrowFunctionWithParameters(automatic.ts)", param1, param2, object, differentNameKey, arrayElement);
-    console.log("externalArrowFunction called");
+    console.log("externalArrowFunctionWithParameters called");
   };
 `
             ;
@@ -993,7 +993,7 @@ window.eventStack.set(
     [arrayElement, ...restArrayElement]: any,
     ...rest: any
   ) => {
-    console.log("externalArrowFunction called");
+    console.log("externalArrowFunctionWithParameters called");
 
     const innerFunction = () => {
       console.log("innerFunction called");
@@ -1017,7 +1017,7 @@ window.eventStack.set(
     ...rest: any
   ) => {
     window.eventStack.set("function", "externalArrowFunctionWithParameters(automatic.ts)", param1, param2, object, differentNameKey, arrayElement);
-    console.log("externalArrowFunction called");
+    console.log("externalArrowFunctionWithParameters called");
 
     const innerFunction = () => {
       window.eventStack.set("function", "innerFunction(automatic.ts)");
@@ -1090,7 +1090,7 @@ window.eventStack.set(
     [arrayElement, ...restArrayElement]: any,
     ...rest: any
   ) {
-    console.log("normalFunction called");
+    console.log("externalNormalFunctionWithParameters called");
   };
 `
             ;
@@ -1110,7 +1110,7 @@ window.eventStack.set(
     ...rest: any
   ) {
     window.eventStack.set("function", "externalNormalFunctionWithParameters(automatic.ts)", param1, param2, object, differentNameKey, arrayElement);
-    console.log("normalFunction called");
+    console.log("externalNormalFunctionWithParameters called");
   };
 `
             ;
@@ -1140,7 +1140,7 @@ window.eventStack.set(
     [arrayElement, ...restArrayElement]: any,
     ...rest: any
   ) {
-    console.log("normalFunction called");
+    console.log("externalNormalFunctionWithParameters called");
 
     function innerFunction() {
       console.log("innerFunction called");
@@ -1164,7 +1164,7 @@ window.eventStack.set(
     ...rest: any
   ) {
     window.eventStack.set("function", "externalNormalFunctionWithParameters(automatic.ts)", param1, param2, object, differentNameKey, arrayElement);
-    console.log("normalFunction called");
+    console.log("externalNormalFunctionWithParameters called");
 
     function innerFunction() {
       window.eventStack.set("function", "innerFunction(automatic.ts)");
@@ -1193,7 +1193,7 @@ window.eventStack.set(
             const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   function externalNormalFunctionWithoutParameters() {
-    console.log("normalFunction called");
+    console.log("externalNormalFunctionWithoutParameters called");
   };
 `
             ;
@@ -1207,7 +1207,7 @@ window.eventStack.set(
             const expectedCode = `
   function externalNormalFunctionWithoutParameters() {
     window.eventStack.set("function", "externalNormalFunctionWithoutParameters(automatic.ts)");
-    console.log("normalFunction called");
+    console.log("externalNormalFunctionWithoutParameters called");
   };
 `
             ;
@@ -1848,7 +1848,7 @@ window.eventStack.set(
             const emptyPosition = new vscode.Position(5, 0);
             const functionCode = `
   return function returnedFunction() {
-
+    console.log("returnedFunction called");
   };
 `
             ;

@@ -11,7 +11,7 @@ export const useBanner = () => {
   //   [arrayElement, ...restArrayElement]: any,
   //   ...rest: any
   // ) => {
-  //   console.log("externalArrowFunction called");
+  //   console.log("externalArrowFunctionWithParameters called");
 
   //   // [TEST] normally execute with an inner arrow function
   //   const innerFunction = () => {
@@ -32,7 +32,7 @@ export const useBanner = () => {
   //   [arrayElement, ...restArrayElement]: any,
   //   ...rest: any
   // ) {
-  //   console.log("normalFunction called");
+  //   console.log("externalNormalFunctionWithParameters called");
 
   //   // [TEST] normally execute with an inner normal function
   //   function innerFunction() {
@@ -42,7 +42,7 @@ export const useBanner = () => {
 
   // [TEST] normally execute with a normal function without parameters
   // function externalNormalFunctionWithoutParameters() {
-  //   console.log("normalFunction called");
+  //   console.log("externalNormalFunctionWithoutParameters called");
   // };
 
   /* ------------------------------------------------------------ */
@@ -132,6 +132,6 @@ export const useBanner = () => {
 
   // [TEST] normally not execute with a function returned from a function
   // return function returnedFunction() {
-
+  //   console.log("returnedFunction called");
   // };
 };
