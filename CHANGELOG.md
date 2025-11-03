@@ -2,12 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.0] - 2025.08.31
+## [1.0.1] - 2025.11.03
+
+### Added
+
+- Test codes for automatic eventStack addition.
+
+## [1.0.0] - 2025.10.31
 
 ### Added
 
 - Initial release of EventStack Helper for VSCode.
-- Automatic eventStack injection.
+- Function to automatically add eventStack.
   - Automatically adds eventStack tracking code to newly created functions when files are saved.
   - Configuration options:
     - `eventstack-helper.autoAddEventStack`: Enable/disable automatic addition (default: true)
