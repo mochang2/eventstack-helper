@@ -1750,6 +1750,7 @@ const object = {
             await document.save();
         });
 
+        // not described in the fixtures
         test("When changing the name of the function, it should be inserted if there is no event stack", async () => {
             // given
             await waitForLoadingExtension();
@@ -2175,6 +2176,7 @@ function newFunction() {
     });
 
     suite("New.vue", () => {
+        // not described in the fixtures
         test("Adding a new function in a new file automatically inserts event stack", async () => {
             await waitForLoadingExtension();
 
@@ -2216,6 +2218,7 @@ function newFunction(): void {
             await sleep(200); // wait for document to be deleted
         });
 
+        // not described in the fixtures
         test("When renaming a file, the function information from the previous file is moved to the new file, that is, it does not automatically insert event stack", async () => {
             // given
             await waitForLoadingExtension();
@@ -2263,6 +2266,7 @@ function newFunction(): void {
     });
 
     suite("new.ts", () => {
+        // not described in the fixtures
         test("Adding a new function in a new file automatically adds event stack", async () => {
             // given
             await waitForLoadingExtension();
@@ -2299,6 +2303,7 @@ function newFunction() {
             await sleep(200); // wait for document to be deleted
         });
 
+        // not described in the fixtures
         test("When renaming a file, the function information from the previous file is moved to the new file, that is, it does not automatically insert event stack", async () => {
             // given
             await waitForLoadingExtension();
