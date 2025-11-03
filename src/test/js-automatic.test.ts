@@ -326,7 +326,7 @@ const commonVariable = "This is var1";
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "commonVariable(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -356,7 +356,7 @@ const commonRef = ref(0);
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "commonRef(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -388,7 +388,7 @@ const variableFunction = function aa() {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "variableFunction(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -420,7 +420,7 @@ const computedValue = computed(() => {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "computedValue(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -450,7 +450,7 @@ const oneLineArrowFunctionWithoutBody = () => "aa";
             await sleep(200); // wait for extension to process
 
             // then
-            let notExpectedCode = `window.eventStack.set(`;
+            let notExpectedCode = `window.eventStack.set("function", "oneLineArrowFunctionWithoutBody(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -474,7 +474,7 @@ const multiLineArrowFunctionWithoutBody = () => ({
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "multiLineArrowFunctionWithoutBody(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -500,7 +500,7 @@ const multiLineNestedArrowFunctionWithoutBody = () => ({
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "multiLineNestedArrowFunctionWithoutBody(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -530,7 +530,7 @@ function oneLineNormalFunctionWithBody() { console.log("oneLineNormalFunctionWit
             await sleep(200); // wait for extension to process
 
             // then
-            let notExpectedCode = `window.eventStack.set(`;
+            let notExpectedCode = `window.eventStack.set("function", "oneLineNormalFunctionWithBody(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -552,7 +552,7 @@ const oneLineArrowFunctionWithBody = () => { console.log("oneLineArrowFunctionWi
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "oneLineArrowFunctionWithBody(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -584,7 +584,7 @@ function functionWithEventStack1() {
             await sleep(200); // wait for extension to process
 
             // then
-            let notExpectedCode = `window.eventStack.set(`;
+            let notExpectedCode = `window.eventStack.set("function", "functionWithEventStack1(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -608,7 +608,7 @@ function functionWithEventStack2() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "functionWithEventStack2(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -632,7 +632,7 @@ function functionWithEventStack3() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "functionWithEventStack3(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -656,7 +656,7 @@ function functionWithEventStack4() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "functionWithEventStack4(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -687,7 +687,7 @@ function functionWithEventStack4() {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "iifeFunction(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -732,7 +732,22 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            let notExpectedCode = `window.eventStack.set("function", "arrowFunction(Automatic.vue)")`;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            notExpectedCode = `window.eventStack.set("function", "normalFunction(Automatic.vue)")`;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            notExpectedCode = `window.eventStack.set("function", "nested.arrowFunction(Automatic.vue)")`;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            notExpectedCode = `window.eventStack.set("function", "nested.normalFunction(Automatic.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1058,7 +1073,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "commonVariable(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1088,7 +1103,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("window", "commonRef(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1120,7 +1135,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "variableFunction(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1152,7 +1167,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "computedValue(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1182,7 +1197,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            let notExpectedCode = `window.eventStack.set(`;
+            let notExpectedCode = `window.eventStack.set("function", "oneLineArrowFunctionWithoutBody(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1206,7 +1221,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "multiLineArrowFunctionWithoutBody(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1232,7 +1247,7 @@ const object = {
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "multiLineNestedArrowFunctionWithoutBody(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1262,7 +1277,7 @@ const object = {
             await sleep(200); // wait for extension to process
             
             // then
-            let notExpectedCode = `window.eventStack.set(`;
+            let notExpectedCode = `window.eventStack.set("function", "oneLineNormalFunctionWithBody(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1284,7 +1299,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "oneLineArrowFunctionWithBody(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1316,7 +1331,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            let notExpectedCode = `window.eventStack.set(`;
+            let notExpectedCode = `window.eventStack.set("function", "functionWithEventStack1(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1340,7 +1355,7 @@ const object = {
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "functionWithEventStack2(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1364,7 +1379,7 @@ const object = {
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "functionWithEventStack3(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1388,7 +1403,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `window.eventStack.set(`;
+            notExpectedCode = `window.eventStack.set("function", "functionWithEventStack4(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1420,7 +1435,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "iifeFunction(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1465,7 +1480,22 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            let notExpectedCode = `window.eventStack.set("function", "arrowFunction(automatic.js)")`;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            notExpectedCode = `window.eventStack.set("function", "normalFunction(automatic.js)")`;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            notExpectedCode = `window.eventStack.set("function", "nested.arrowFunction(automatic.js)")`;
+            assert.ok(
+                !document.getText().includes(notExpectedCode),
+                "eventstack is unexpectedly inserted"
+            );
+            notExpectedCode = `window.eventStack.set("function", "nested.normalFunction(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1497,7 +1527,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "returnedFunction(automatic.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1601,7 +1631,7 @@ function newFunction() {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "newFunction(Error.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1648,7 +1678,7 @@ function newFunction() {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "newFunction(Error.vue)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1809,7 +1839,7 @@ function newFunction() {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "newFunction(error.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1855,7 +1885,7 @@ function newFunction() {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "newFunction(error.js)")`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -2011,7 +2041,7 @@ function newFunction() {
             const newDocument = await vscode.workspace.openTextDocument(newFileUri);
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "newFunction(New3.vue)")`;
             assert.ok(
                 !newDocument.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -2090,7 +2120,7 @@ function newFunction() {
             const newDocument = await vscode.workspace.openTextDocument(newFileUri);
 
             // then
-            const notExpectedCode = `window.eventStack.set(`;
+            const notExpectedCode = `window.eventStack.set("function", "newFunction(new3.js)")`;
             assert.ok(
                 !newDocument.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
