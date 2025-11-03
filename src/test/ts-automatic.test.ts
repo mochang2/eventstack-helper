@@ -327,10 +327,7 @@ const commonVariable: string = "This is var1";
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -360,10 +357,7 @@ const commonRef = ref<number>(0);
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -395,10 +389,7 @@ const variableFunction = function aa(): void {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -430,10 +421,7 @@ const computedValue = computed<number>(() => {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -463,10 +451,7 @@ const oneLineArrowFunctionWithoutBody = () => "aa";
             await sleep(200); // wait for extension to process
 
             // then
-            let notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            let notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -490,10 +475,7 @@ const multiLineArrowFunctionWithoutBody = () => ({
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -519,10 +501,7 @@ const multiLineNestedArrowFunctionWithoutBody = () => ({
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -552,10 +531,7 @@ function oneLineNormalFunctionWithBody() { console.log("oneLineNormalFunctionWit
             await sleep(200); // wait for extension to process
 
             // then
-            let notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            let notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -577,10 +553,7 @@ const oneLineArrowFunctionWithBody = () => { console.log("oneLineArrowFunctionWi
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -612,10 +585,7 @@ function functionWithEventStack1() {
             await sleep(200); // wait for extension to process
 
             // then
-            let notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            let notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -639,10 +609,7 @@ function functionWithEventStack2() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -666,10 +633,7 @@ function functionWithEventStack3() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -693,10 +657,7 @@ function functionWithEventStack4() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -720,10 +681,7 @@ function functionWithEventStack5() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -747,10 +705,7 @@ function functionWithEventStack6() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -774,10 +729,7 @@ function functionWithEventStack7() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -801,10 +753,7 @@ function functionWithEventStack8() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -828,10 +777,7 @@ function functionWithEventStack9() {
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -863,10 +809,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -911,10 +854,7 @@ const object = {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1240,10 +1180,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1273,10 +1210,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1308,10 +1242,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1343,10 +1274,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1376,10 +1304,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            let notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            let notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1403,10 +1328,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1432,10 +1354,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1465,10 +1384,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            let notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            let notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1490,10 +1406,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1525,10 +1438,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
             
             // then
-            let notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            let notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1552,10 +1462,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1579,10 +1486,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1606,10 +1510,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1633,10 +1534,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1660,10 +1558,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1687,10 +1582,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1714,10 +1606,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1741,10 +1630,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
             
             // then
-            notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1776,10 +1662,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1824,10 +1707,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1859,10 +1739,7 @@ window.eventStack.set(
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set(
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -1965,10 +1842,7 @@ function newFunction(): void {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set("function", "newFunction(Error.vue)");
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -2015,10 +1889,7 @@ function newFunction(): void {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set("function", "newFunction(Error.vue)");
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -2179,10 +2050,7 @@ function newFunction() {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set("function", "newFunction(error.ts)");
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -2228,10 +2096,7 @@ function newFunction() {
             await sleep(200); // wait for extension to process
 
             // then
-            const notExpectedCode = `
-  window.eventStack.set("function", "newFunction(error.ts)");
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -2385,10 +2250,7 @@ function newFunction(): void {
             const newDocument = await vscode.workspace.openTextDocument(newFileUri);
 
             // then
-            const notExpectedCode = `
-window.eventStack.set("function", "newFunction(New3.vue)");
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !newDocument.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
@@ -2465,10 +2327,7 @@ function newFunction(): void {
             const newDocument = await vscode.workspace.openTextDocument(newFileUri);
 
             // then
-            const notExpectedCode = `
-window.eventStack.set("function", "newFunction(new3.ts)");
-`
-            ;
+            const notExpectedCode = `window.eventStack.set(`;
             assert.ok(
                 !newDocument.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
