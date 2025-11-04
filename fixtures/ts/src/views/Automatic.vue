@@ -42,12 +42,12 @@ import { ref, computed } from "vue";
 //   function innerFunction() {
 //     console.log("innerFunction called");
 //   }
-// };
+// }
 
 // [TEST] normally execute with a normal function without parameters
 // function externalNormalFunctionWithoutParameters() {
 //   console.log("externalNormalFunctionWithoutParameters called");
-// };
+// }
 
 /* ------------------------------------------------------------ */
 
@@ -85,31 +85,31 @@ import { ref, computed } from "vue";
 // [TEST] normally not execute with a function that already has eventstack
 // function functionWithEventStack1() {
 //   (window as any).eventStack.set("function", "functionWithEventStack1");
-// };
+// }
 // function functionWithEventStack2() {
 //   (window as any)?.eventStack.set("function", "functionWithEventStack2");
-// };
+// }
 // function functionWithEventStack3() {
 //   (window as any)!.eventStack.set("function", "functionWithEventStack3");
-// };
+// }
 // function functionWithEventStack4() {
 //   (window as any).eventStack?.set("function", "functionWithEventStack4");
-// };
+// }
 // function functionWithEventStack5() {
 //   (window as any).eventStack!.set("function", "functionWithEventStack5");
-// };
+// }
 // function functionWithEventStack6() {
 //   (window as any)?.eventStack!.set("function", "functionWithEventStack6");
-// };
+// }
 // function functionWithEventStack7() {
 //   (window as any)!.eventStack?.set("function", "functionWithEventStack7");
-// };
+// }
 // function functionWithEventStack8() {
 //   (window as any)?.eventStack?.set("function", "functionWithEventStack8");
-// };
+// }
 // function functionWithEventStack9() {
 //   (window as any)!.eventStack!.set("function", "functionWithEventStack9");
-// };
+// }
 
 // [TEST] normally not execute with an IIFE even though it has a name and a body
 // (function iifeFunction() {

@@ -38,12 +38,12 @@ export const useBanner = () => {
   //   function innerFunction() {
   //     console.log("innerFunction called");
   //   }
-  // };
+  // }
 
   // [TEST] normally execute with a normal function without parameters
   // function externalNormalFunctionWithoutParameters() {
   //   console.log("externalNormalFunctionWithoutParameters called");
-  // };
+  // }
 
   /* ------------------------------------------------------------ */
     
@@ -81,16 +81,16 @@ export const useBanner = () => {
   // [TEST] normally not execute with a function that already has eventstack
   // function functionWithEventStack1() {
   //   window.eventStack.set("function", "functionWithEventStack1");
-  // };
+  // }
   // function functionWithEventStack2() {
   //   window?.eventStack.set("function", "functionWithEventStack2");
-  // };
+  // }
   // function functionWithEventStack3() {
   //   window.eventStack?.set("function", "functionWithEventStack3");
-  // };
+  // }
   // function functionWithEventStack4() {
   //   window?.eventStack?.set("function", "functionWithEventStack4");
-  // };
+  // }
 
   // [TEST] normally not execute with an IIFE even though it has a name and a body
   // (function iifeFunction() {
@@ -118,5 +118,5 @@ export const useBanner = () => {
   // [TEST] normally not execute with a function returned from a function
   // return function returnedFunction() {
   //   console.log("returnedFunction called");
-  // };
+  // }
 };
