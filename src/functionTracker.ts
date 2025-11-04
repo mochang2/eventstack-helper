@@ -28,15 +28,24 @@ export class FunctionTracker {
         }
     }
 
-    async getNewlyAddedFunctions(fileUri: vscode.Uri): Promise<FunctionInfo[]> {
-        // if the file was invalid at the last save, skip this file
-        if (this.invalidFiles.has(fileUri.fsPath)) {
-            return [];
-        }
-
+    async getFunctions(fileUri: vscode.Uri): Promise<{
+        newlyAddedFunctions: FunctionInfo[],
+        currentFunctions: FunctionInfo[] | null 
+    }> {
         const currentFunctions = await getFunctions(fileUri);
         if (!currentFunctions) {
-            return [];
+            return {
+                newlyAddedFunctions: [],
+                currentFunctions: null
+            };
+        }
+
+        // if the file was invalid at the last save, skip this file
+        if (this.invalidFiles.has(fileUri.fsPath)) {
+            return {
+                newlyAddedFunctions: [],
+                currentFunctions: currentFunctions
+            };
         }
 
         const previousFunctionNames =
@@ -46,16 +55,20 @@ export class FunctionTracker {
             ({ functionName }) => !previousFunctionNames.includes(functionName)
         );
 
-        return newlyAddedFunctions;
+        return {
+            newlyAddedFunctions: newlyAddedFunctions,
+            currentFunctions: currentFunctions
+        };
     }
 
-    async updateFile(fileUri: vscode.Uri): Promise<void> {
-        const functions = await getFunctions(fileUri);
+    async updateFile(fileUri: vscode.Uri, functions: FunctionInfo[] | null): Promise<void> {
         if (!functions) {
             this.invalidFiles.add(fileUri.fsPath);
 
             return;
-        } else if (this.invalidFiles.has(fileUri.fsPath)) {
+        }
+        
+        if (this.invalidFiles.has(fileUri.fsPath)) {
             this.invalidFiles.delete(fileUri.fsPath);
         }
 

@@ -24,11 +24,11 @@ export async function activate(context: vscode.ExtensionContext) {
     const onDidSaveTextDocument = vscode.workspace.onDidSaveTextDocument(
         async (textDocument) => {
             const savedFileUri = textDocument.uri;
-            const newlyAddedFunctions =
-                await functionTracker.getNewlyAddedFunctions(savedFileUri);
+            const { newlyAddedFunctions, currentFunctions } =
+                await functionTracker.getFunctions(savedFileUri);
 
             await automaticallyAddEventStack(savedFileUri, newlyAddedFunctions);
-            await functionTracker.updateFile(savedFileUri);
+            await functionTracker.updateFile(savedFileUri, currentFunctions);
         }
     );
 
