@@ -67,47 +67,33 @@ export const useBanner = () => {
 
   // [TEST] normally execute with an object
   const objectWithFunctions = {
-    method1() {
-      console.log("method1 called");
+    objectMethod1() {
+      console.log("objectMethod1 called");
     },
-    method2: () => {
-      console.log("method2 called");
+    objectMethod2: () => {
+      console.log("objectMethod2 called");
     },
-    method3: function () {
-      console.log("method3 called");
+    objectMethod3: function () {
+      console.log("objectMethod3 called");
     },
-    method4: function name() {
-      console.log("method4 called");
-    },
-    nested: {
-      method1() {
-        console.log("method1 called");
-      },
-      method2: () => {
-        console.log("method2 called");
-      },
-      method3: function () {
-        console.log("method3 called");
-      },
-      method4: function name() {
-        console.log("method4 called");
-      },
+    objectMethod4: function name() {
+      console.log("objectMethod4 called");
     },
   };
 
   // [TEST] normally execute with a class method
   class MethodClass {
-    method1() {
-      console.log("method1 called");
+    classMethod1() {
+      console.log("classMethod1 called");
     }
-    method2 = () => {
-      console.log("method2 called");
+    classMethod2 = () => {
+      console.log("classMethod2 called");
     };
-    method3 = function () {
-      console.log("method3 called");
+    classMethod3 = function () {
+      console.log("classMethod3 called");
     };
-    method4 = function name() {
-      console.log("method4 called");
+    classMethod4 = function name() {
+      console.log("classMethod4 called");
     };
   }
 

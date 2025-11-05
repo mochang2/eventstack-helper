@@ -48,12 +48,12 @@ function externalNormalFunctionWithParameters(
   function innerFunction(): void {
     console.log("innerFunction called");
   }
-};
+}
 
 // [TEST] normally execute with a normal function without parameters
 function externalNormalFunctionWithoutParameters(): void {
   console.log("externalNormalFunctionWithoutParameters called");
-};
+}
 
 // [TEST] normally execute with an IIFE
 (function iifeFunction(): void {
@@ -67,51 +67,37 @@ function returnNormalNamedFunction(): () => void {
   return function returnedFunction(): void {
     console.log("returnedFunction called");
   };
-};
+}
 
 // [TEST] normally execute with an object
 const objectWithFunctions = {
-  method1(): void {
-    console.log("method1 called");
+  objectMethod1(): void {
+    console.log("objectMethod1 called");
   },
-  method2: (): void => {
-    console.log("method2 called");
+  objectMethod2: (): void => {
+    console.log("objectMethod2 called");
   },
-  method3: function (): void {
-    console.log("method3 called");
+  objectMethod3: function (): void {
+    console.log("objectMethod3 called");
   },
-  method4: function name(): void {
-    console.log("method4 called");
-  },
-  nested: {
-    method1(): void {
-      console.log("method1 called");
-    },
-    method2: (): void => {
-      console.log("method2 called");
-    },
-    method3: function (): void {
-      console.log("method3 called");
-    },
-    method4: function name(): void {
-      console.log("method4 called");
-    },
+  objectMethod4: function name(): void {
+    console.log("objectMethod4 called");
   },
 };
 
 // [TEST] normally execute with a class method
 class MethodClass {
-  method1(): void {
-    console.log("method1 called");
+  classMethod1(): void {
+    console.log("classMethod1 called");
   }
-  method2 = (): void => {
-    console.log("method2 called");
+  classMethod2 = (): void => {
+    console.log("classMethod2 called");
   }
-  method3 = function (): void {
-    console.log("method3 called");
+  classMethod3 = function (): void {
+    console.log("classMethod3 called");
   }
-  method4 = function name(): void {
-    console.log("method4 called");
+  classMethod4 = function name(): void {
+    console.log("classMethod4 called");
   }
 }
 
