@@ -51,3 +51,16 @@ export async function renameDocument(oldFilePath: string, newFilePath: string): 
     
     return vscode.Uri.file(newFilePath);
 }
+
+export async function setCursorToRandomPositionInCode(
+    document: vscode.TextDocument,
+    code: string
+): Promise<void> {
+    const offset = document.getText().indexOf(code);
+    const randomOffset = offset + Math.floor(Math.random() * code.length);
+    const randomPosition = document.positionAt(randomOffset);
+    
+    const editor = await vscode.window.showTextDocument(document);
+    editor.selection = new vscode.Selection(randomPosition, randomPosition);
+    editor.revealRange(new vscode.Range(randomPosition, randomPosition), vscode.TextEditorRevealType.InCenter);
+}

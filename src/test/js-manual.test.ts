@@ -6,6 +6,7 @@ import {
   sleep,
   insert,
   remove,
+  setCursorToRandomPositionInCode,
 } from "./utils.test";
 
 suite("js basic", () => {
@@ -34,16 +35,20 @@ const externalArrowFunctionWithParameters = (
   console.log("externalArrowFunctionWithParameters called");
 `
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "externalArrowFunctionWithParameters(Manual.vue)", param1, param2, object, differentNameKey, arrayElement);`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+  window.eventStack.set("function", "externalArrowFunctionWithParameters(Manual.vue)", param1, param2, object, differentNameKey, arrayElement);`;
 
             assert.ok(
                 document.getText().includes(expectedCode),
@@ -63,32 +68,24 @@ const externalArrowFunctionWithParameters = (
             const document = await vscode.workspace.openTextDocument(fileUri);
 
             const functionCode = `
-const externalArrowFunctionWithParameters = (
-  param1,
-  param2,
-  { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject },
-  [arrayElement, ...restArrayElement],
-  ...rest
-) => {
-  console.log("externalArrowFunctionWithParameters called");
-
-  // [TEST] normally execute with an inner arrow function
   const innerFunction = () => {
     console.log("innerFunction called");
-  };
-};
-`
+  };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "innerFunction(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+    window.eventStack.set("function", "innerFunction(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -109,19 +106,22 @@ const externalArrowFunctionWithParameters = (
             const functionCode = `
 const externalArrowFunctionWithoutParameters = () => {
   console.log("externalArrowFunctionWithoutParameters called");
-};
-`
+};`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "externalArrowFunctionWithoutParameters(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+  window.eventStack.set("function", "externalArrowFunctionWithoutParameters(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -142,19 +142,22 @@ const externalArrowFunctionWithoutParameters = () => {
             let functionCode = `
 let variableLetFunction = function () {
   console.log("variableLetFunction called");
-};
-`
+};`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            let expectedCode = `window.eventStack.set("function", "variableLetFunction(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            let expectedCode = `
+  window.eventStack.set("function", "variableLetFunction(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -167,19 +170,22 @@ let variableLetFunction = function () {
             functionCode = `
 const variableConstFunction = function name() {
   console.log("variableConstFunction called");
-};
-`
+};`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "variableConstFunction(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+  window.eventStack.set("function", "variableConstFunction(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -208,16 +214,20 @@ function externalNormalFunctionWithParameters(
   console.log("externalNormalFunctionWithParameters called");
 `
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
-
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
+            
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "externalNormalFunctionWithParameters(Manual.vue)", param1, param2, object, differentNameKey, arrayElement);`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+  window.eventStack.set("function", "externalNormalFunctionWithParameters(Manual.vue)", param1, param2, object, differentNameKey, arrayElement);`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -236,32 +246,24 @@ function externalNormalFunctionWithParameters(
             const document = await vscode.workspace.openTextDocument(fileUri);
 
             const functionCode = `
-function externalNormalFunctionWithParameters(
-  param1,
-  param2,
-  { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }, 
-  [arrayElement, ...restArrayElement],
-  ...rest
-  ) {
-  console.log("externalNormalFunctionWithParameters called");
-
-  // [TEST] normally execute with an inner normal function
   function innerFunction() {
     console.log("innerFunction called");
-  }
-}
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "innerFunction(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+    window.eventStack.set("function", "innerFunction(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -282,19 +284,22 @@ function externalNormalFunctionWithParameters(
             const functionCode = `
 function externalNormalFunctionWithoutParameters() {
   console.log("externalNormalFunctionWithoutParameters called");
-}
-`
+}`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "externalNormalFunctionWithoutParameters(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+  window.eventStack.set("function", "externalNormalFunctionWithoutParameters(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -315,19 +320,22 @@ function externalNormalFunctionWithoutParameters() {
             const functionCode = `
 (function iifeFunction() {
   console.log("iifeFunction called");
-})()
-`
+})()`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "iifeFunction(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+  window.eventStack.set("function", "iifeFunction(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -348,19 +356,22 @@ function externalNormalFunctionWithoutParameters() {
             const functionCode = `
   return function returnedFunction() {
     console.log("returnedFunction called");
-  };
-`
+  };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "returnedFunction(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+    window.eventStack.set("function", "returnedFunction(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -381,19 +392,22 @@ function externalNormalFunctionWithoutParameters() {
             let functionCode = `
   objectMethod1() {
     console.log("objectMethod1 called");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            let expectedCode = `window.eventStack.set("function", "objectMethod1(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            let expectedCode = `
+    window.eventStack.set("function", "objectMethod1(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -406,19 +420,22 @@ function externalNormalFunctionWithoutParameters() {
             functionCode = `
   objectMethod2: () => {
     console.log("objectMethod2 called");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "objectMethod2(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+    window.eventStack.set("function", "objectMethod2(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -431,19 +448,22 @@ function externalNormalFunctionWithoutParameters() {
             functionCode = `
   objectMethod3: function () {
     console.log("objectMethod3 called");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "objectMethod3(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+    window.eventStack.set("function", "objectMethod3(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -456,19 +476,22 @@ function externalNormalFunctionWithoutParameters() {
             functionCode = `
   objectMethod4: function name() {
     console.log("objectMethod4 called");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "objectMethod4(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+    window.eventStack.set("function", "objectMethod4(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -489,20 +512,22 @@ function externalNormalFunctionWithoutParameters() {
             let functionCode = `
   classMethod1() {
     console.log("classMethod1 called");
-  }
-`
+  }`
             ;
-
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            let expectedCode = `window.eventStack.set("function", "classMethod1(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            let expectedCode = `
+    window.eventStack.set("function", "classMethod1(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -515,19 +540,22 @@ function externalNormalFunctionWithoutParameters() {
             functionCode = `
   classMethod2 = () => {
     console.log("classMethod2 called");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
-            
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
+
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "classMethod2(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+    window.eventStack.set("function", "classMethod2(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -540,19 +568,22 @@ function externalNormalFunctionWithoutParameters() {
             functionCode = `
   classMethod3 = function () {
     console.log("classMethod3 called");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
-            
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
+
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "classMethod3(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+    window.eventStack.set("function", "classMethod3(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -565,19 +596,22 @@ function externalNormalFunctionWithoutParameters() {
             functionCode = `
   classMethod4 = function name() {
     console.log("classMethod4 called");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
-            
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
+
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "classMethod4(Manual.vue)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+    window.eventStack.set("function", "classMethod4(Manual.vue)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -596,14 +630,16 @@ function externalNormalFunctionWithoutParameters() {
             const document = await vscode.workspace.openTextDocument(fileUri);
 
             let functionCode = `
-const oneLineArrowFunctionWithoutBody = () => "aa";
-`
+const oneLineArrowFunctionWithoutBody = () => "aa";`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -617,14 +653,16 @@ const oneLineArrowFunctionWithoutBody = () => "aa";
             functionCode = `
 const multiLineArrowFunctionWithoutBody = () => ({
   aa: "aa",
-});
-`
+})`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -640,11 +678,13 @@ const multiLineNestedArrowFunctionWithoutBody = () => ({
   aa: () => ({
     bb: "bb",
   })
-})
-`
+})`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
             // trigger(keyboard or command palette)
@@ -667,14 +707,16 @@ const multiLineNestedArrowFunctionWithoutBody = () => ({
             const document = await vscode.workspace.openTextDocument(fileUri);
 
             let functionCode = `
-function oneLineNormalFunctionWithBody() { console.log("oneLineNormalFunctionWithBody called"); }
-`
+function oneLineNormalFunctionWithBody() { console.log("oneLineNormalFunctionWithBody called"); }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -686,14 +728,16 @@ function oneLineNormalFunctionWithBody() { console.log("oneLineNormalFunctionWit
             );
 
             functionCode = `
-const oneLineArrowFunctionWithBody = () => { console.log("oneLineArrowFunctionWithBody called"); };
-`
+const oneLineArrowFunctionWithBody = () => { console.log("oneLineArrowFunctionWithBody called"); };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -715,14 +759,16 @@ const oneLineArrowFunctionWithBody = () => { console.log("oneLineArrowFunctionWi
             let functionCode = `
 function functionWithEventStack1() {
   window.eventStack.set("function", "functionWithEventStack1");
-}
-`
+}`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -736,14 +782,16 @@ function functionWithEventStack1() {
             functionCode = `
 function functionWithEventStack2() {
   window?.eventStack.set("function", "functionWithEventStack2");
-}
-`
+}`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -757,14 +805,16 @@ function functionWithEventStack2() {
             functionCode = `
 function functionWithEventStack3() {
   window.eventStack?.set("function", "functionWithEventStack3");
-}
-`
+}`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -778,14 +828,16 @@ function functionWithEventStack3() {
             functionCode = `
 function functionWithEventStack4() {
   window?.eventStack?.set("function", "functionWithEventStack4");
-}
-`
+}`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -807,14 +859,16 @@ function functionWithEventStack4() {
             let functionCode = `
 (function () {
   console.log("iifeFunction called");
-})();
-`
+})()`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -828,14 +882,16 @@ function functionWithEventStack4() {
             functionCode = `
 (() => {
   console.log("iifeFunction called");
-})();
-`
+})()`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -857,14 +913,16 @@ function functionWithEventStack4() {
             let functionCode = `
   return function () {
     console.log("returnedFunction called");
-  };
-`
+  };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -875,17 +933,24 @@ function functionWithEventStack4() {
                 "eventstack is unexpectedly inserted"
             );
 
+            // clean up
+            await remove(fileUri, document, `
+  window.eventStack.set("function", "returnNormalNoNamedFunction(Manual.vue)");`);
+            await document.save();
+
             functionCode = `
   return () => {
     console.log("returnedFunction called");
-  };
-`
+  };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -895,6 +960,11 @@ function functionWithEventStack4() {
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
             );
+
+            // clean up
+            await remove(fileUri, document, `
+  window.eventStack.set("function", "returnArrowNoNamedFunction(Manual.vue)");`);
+            await document.save();
         });
     });
 
@@ -917,16 +987,20 @@ function functionWithEventStack4() {
     console.log("externalArrowFunctionWithParameters called");
 `
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "externalArrowFunctionWithParameters(manual.js)", param1, param2, object, differentNameKey, arrayElement);`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+    window.eventStack.set("function", "externalArrowFunctionWithParameters(manual.js)", param1, param2, object, differentNameKey, arrayElement);`;
 
             assert.ok(
                 document.getText().includes(expectedCode),
@@ -946,32 +1020,24 @@ function functionWithEventStack4() {
             const document = await vscode.workspace.openTextDocument(fileUri);
 
             const functionCode = `
-  const externalArrowFunctionWithParameters = (
-    param1,
-    param2, 
-    { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }, 
-    [arrayElement, ...restArrayElement],
-    ...rest
-  ) => {
-    console.log("externalArrowFunctionWithParameters called");
-
-    // [TEST] normally execute with an inner arrow function
     const innerFunction = () => {
       console.log("innerFunction called");
-    };
-  };
-`
+    };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "innerFunction(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+      window.eventStack.set("function", "innerFunction(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -992,19 +1058,22 @@ function functionWithEventStack4() {
             const functionCode = `
   const externalArrowFunctionWithoutParameters = () => {
     console.log("externalArrowFunctionWithoutParameters called");
-  };
-`
+  };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "externalArrowFunctionWithoutParameters(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+    window.eventStack.set("function", "externalArrowFunctionWithoutParameters(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1025,19 +1094,22 @@ function functionWithEventStack4() {
             let functionCode = `
   let variableLetFunction = function () {
     console.log("variableLetFunction called");
-  };
-`
+  };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            let expectedCode = `window.eventStack.set("function", "variableLetFunction(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            let expectedCode = `
+    window.eventStack.set("function", "variableLetFunction(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1050,19 +1122,22 @@ function functionWithEventStack4() {
             functionCode = `
   const variableConstFunction = function name() {
     console.log("variableConstFunction called");
-  };
-`
+  };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "variableConstFunction(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+    window.eventStack.set("function", "variableConstFunction(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1091,16 +1166,20 @@ function functionWithEventStack4() {
     console.log("externalNormalFunctionWithParameters called");
 `
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "externalNormalFunctionWithParameters(manual.js)", param1, param2, object, differentNameKey, arrayElement);`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+    window.eventStack.set("function", "externalNormalFunctionWithParameters(manual.js)", param1, param2, object, differentNameKey, arrayElement);`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1119,32 +1198,24 @@ function functionWithEventStack4() {
             const document = await vscode.workspace.openTextDocument(fileUri);
 
             const functionCode = `
-  function externalNormalFunctionWithParameters(
-    param1,
-    param2, 
-    { object, originalKey: differentNameKey, nestedObject: { originalKey: differentNameKey2 }, ...restObject }, 
-    [arrayElement, ...restArrayElement],
-    ...rest
-  ) {
-    console.log("externalNormalFunctionWithParameters called");
-
-    // [TEST] normally execute with an inner normal function
     function innerFunction() {
       console.log("innerFunction called");
-    }
-  }
-`
+    }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "innerFunction(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+      window.eventStack.set("function", "innerFunction(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1165,19 +1236,22 @@ function functionWithEventStack4() {
             const functionCode = `
   function externalNormalFunctionWithoutParameters() {
     console.log("externalNormalFunctionWithoutParameters called");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "externalNormalFunctionWithoutParameters(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+    window.eventStack.set("function", "externalNormalFunctionWithoutParameters(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1198,19 +1272,22 @@ function functionWithEventStack4() {
             const functionCode = `
   (function iifeFunction() {
     console.log("iifeFunction called");
-  })()
-`
+  })()`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "iifeFunction(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+    window.eventStack.set("function", "iifeFunction(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1231,19 +1308,22 @@ function functionWithEventStack4() {
             const functionCode = `
     return function returnedFunction() {
       console.log("returnedFunction called");
-    };
-`
+    };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            const expectedCode = `window.eventStack.set("function", "returnedFunction(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            const expectedCode = `
+      window.eventStack.set("function", "returnedFunction(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1264,19 +1344,22 @@ function functionWithEventStack4() {
             let functionCode = `
     objectMethod1() {
       console.log("objectMethod1 called");
-    }
-`
+    }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            let expectedCode = `window.eventStack.set("function", "objectMethod1(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            let expectedCode = `
+      window.eventStack.set("function", "objectMethod1(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1289,19 +1372,22 @@ function functionWithEventStack4() {
             functionCode = `
     objectMethod2: () => {
       console.log("objectMethod2 called");
-    }
-`
+    }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "objectMethod2(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+      window.eventStack.set("function", "objectMethod2(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1314,19 +1400,22 @@ function functionWithEventStack4() {
             functionCode = `
     objectMethod3: function () {
       console.log("objectMethod3 called");
-    }
-`
+    }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "objectMethod3(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+      window.eventStack.set("function", "objectMethod3(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1339,19 +1428,22 @@ function functionWithEventStack4() {
             functionCode = `
     objectMethod4: function name() {
       console.log("objectMethod4 called");
-    }
-`
+    }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "objectMethod4(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+      window.eventStack.set("function", "objectMethod4(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1372,20 +1464,22 @@ function functionWithEventStack4() {
             let functionCode = `
     classMethod1() {
       console.log("classMethod1 called");
-    }
-`
+    }`
             ;
-
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            let expectedCode = `window.eventStack.set("function", "classMethod1(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            let expectedCode = `
+      window.eventStack.set("function", "classMethod1(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1398,19 +1492,22 @@ function functionWithEventStack4() {
             functionCode = `
     classMethod2 = () => {
       console.log("classMethod2 called");
-    };
-`
+    }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
-            
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
+
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "classMethod2(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+      window.eventStack.set("function", "classMethod2(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1423,19 +1520,22 @@ function functionWithEventStack4() {
             functionCode = `
     classMethod3 = function () {
       console.log("classMethod3 called");
-    };
-`
+    }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
-            
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
+
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "classMethod3(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+      window.eventStack.set("function", "classMethod3(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1448,19 +1548,22 @@ function functionWithEventStack4() {
             functionCode = `
     classMethod4 = function name() {
       console.log("classMethod4 called");
-    };
-`
+    }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
-            
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
+
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
             // then
-            expectedCode = `window.eventStack.set("function", "classMethod4(manual.js)");`; // 공백이 포함되어야 할 수도 있음
+            expectedCode = `
+      window.eventStack.set("function", "classMethod4(manual.js)");`;
             assert.ok(
                 document.getText().includes(expectedCode),
                 "eventstack is not inserted as expected"
@@ -1479,14 +1582,15 @@ function functionWithEventStack4() {
             const document = await vscode.workspace.openTextDocument(fileUri);
 
             let functionCode = `
-  const oneLineArrowFunctionWithoutBody = () => "aa";
-`
-            ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+  const oneLineArrowFunctionWithoutBody = () => "aa";`;
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1496,18 +1600,25 @@ function functionWithEventStack4() {
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
             );
+            
+            // clean up
+            await remove(fileUri, document, `
+  window.eventStack.set("function", "useBanner(manual.js)");`);
+            await document.save();
 
             functionCode = `
   const multiLineArrowFunctionWithoutBody = () => ({
     aa: "aa",
-  });
-`
+  });`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1518,19 +1629,26 @@ function functionWithEventStack4() {
                 "eventstack is unexpectedly inserted"
             );
 
+            // clean up
+            await remove(fileUri, document, `
+  window.eventStack.set("function", "useBanner(manual.js)");`);
+            await document.save();
+
             functionCode = `
   const multiLineNestedArrowFunctionWithoutBody = () => ({
     aa: () => ({
       bb: "bb",
     })
-  });
-`
+  })`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
             
@@ -1540,6 +1658,11 @@ function functionWithEventStack4() {
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
             );
+
+            // clean up
+            await remove(fileUri, document, `
+  window.eventStack.set("function", "useBanner(manual.js)");`);
+            await document.save();
         });
 
         test("Triggering 'manualAddEventStack' inside a one line function with body does not insert event stack", async () => {
@@ -1550,14 +1673,15 @@ function functionWithEventStack4() {
             const document = await vscode.workspace.openTextDocument(fileUri);
 
             let functionCode = `
-  function oneLineNormalFunctionWithBody() { console.log("oneLineNormalFunctionWithBody called"); }
-`
-            ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+  function oneLineNormalFunctionWithBody() { console.log("oneLineNormalFunctionWithBody called"); }`;
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1568,15 +1692,21 @@ function functionWithEventStack4() {
                 "eventstack is unexpectedly inserted"
             );
 
+            // clean up
+            await remove(fileUri, document, `
+  window.eventStack.set("function", "useBanner(manual.js)");`);
+            await document.save();
+
             functionCode = `
-  const oneLineArrowFunctionWithBody = () => { console.log("oneLineArrowFunctionWithBody called"); };
-`
-            ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+  const oneLineArrowFunctionWithBody = () => { console.log("oneLineArrowFunctionWithBody called"); };`;
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1586,6 +1716,11 @@ function functionWithEventStack4() {
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
             );
+
+            // clean up
+            await remove(fileUri, document, `
+  window.eventStack.set("function", "useBanner(manual.js)");`);
+            await document.save();
         });
 
         test("Triggering 'manualAddEventStack' inside a function that already has eventstack does not insert event stack", async () => {
@@ -1598,14 +1733,16 @@ function functionWithEventStack4() {
             let functionCode = `
   function functionWithEventStack1() {
     window.eventStack.set("function", "functionWithEventStack1");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1619,14 +1756,16 @@ function functionWithEventStack4() {
             functionCode = `
   function functionWithEventStack2() {
     window?.eventStack.set("function", "functionWithEventStack2");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1640,14 +1779,16 @@ function functionWithEventStack4() {
             functionCode = `
   function functionWithEventStack3() {
     window.eventStack?.set("function", "functionWithEventStack3");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1661,14 +1802,16 @@ function functionWithEventStack4() {
             functionCode = `
   function functionWithEventStack4() {
     window?.eventStack?.set("function", "functionWithEventStack4");
-  }
-`
+  }`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1690,14 +1833,16 @@ function functionWithEventStack4() {
             let functionCode = `
   (function () {
     console.log("iifeFunction called");
-  })();
-`
+  })()`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1708,17 +1853,24 @@ function functionWithEventStack4() {
                 "eventstack is unexpectedly inserted"
             );
 
+            // clean up
+            await remove(fileUri, document, `
+  window.eventStack.set("function", "useBanner(manual.js)");`);
+            await document.save();
+
             functionCode = `
   (() => {
     console.log("iifeFunction called");
-  })();
-`
+  })()`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1728,6 +1880,11 @@ function functionWithEventStack4() {
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
             );
+
+            // clean up
+            await remove(fileUri, document, `
+  window.eventStack.set("function", "useBanner(manual.js)");`);
+            await document.save();
         });
 
         test("Triggering 'manualAddEventStack' inside a function returned from a function without a name does not insert event stack", async () => {
@@ -1740,14 +1897,16 @@ function functionWithEventStack4() {
             let functionCode = `
     return function () {
       console.log("returnedFunction called");
-    };
-`
+    };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1758,17 +1917,24 @@ function functionWithEventStack4() {
                 "eventstack is unexpectedly inserted"
             );
 
+            // clean up
+            await remove(fileUri, document, `
+    window.eventStack.set("function", "returnNormalNoNamedFunction(manual.js)");`);
+            await document.save();
+
             functionCode = `
     return () => {
       console.log("returnedFunction called");
-    };
-`
+    };`
             ;
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            assert.ok(
+              document.getText().includes(functionCode),
+              "functionCode is not found in the document"
+            );
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
             
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1778,6 +1944,11 @@ function functionWithEventStack4() {
                 !document.getText().includes(notExpectedCode),
                 "eventstack is unexpectedly inserted"
             );
+
+            // clean up
+            await remove(fileUri, document, `
+    window.eventStack.set("function", "returnArrowNoNamedFunction(manual.js)");`);
+            await document.save();
         });
     });
 
@@ -1798,12 +1969,10 @@ function newFunction() {
             ;
             await insert(fileUri, emptyPosition, functionCode);
             await document.save();
-
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
@@ -1837,12 +2006,10 @@ function newFunction() {
             ;
             await insert(fileUri, emptyPosition, functionCode);
             await document.save();
-
-            // document text 내에서 functionCode의 위치를 찾음
-            // functionCode의 위치 내에서 랜덤한 곳에 커서를 둠
+            await setCursorToRandomPositionInCode(document, functionCode.trimStart());
 
             // when
-            // trigger(keyboard or command palette)
+            await vscode.commands.executeCommand("eventstack-helper.manualAddEventStack");
             await document.save();
             await sleep(200); // wait for extension to process
 
