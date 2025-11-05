@@ -3,6 +3,12 @@ import { manuallyAddEventStack, automaticallyAddEventStack } from "./action";
 import { CursorScopeResolver } from "./cursorScopeResolver";
 import { FunctionTracker } from "./functionTracker";
 
+// tests not included(but it works well)
+// - async function
+// - private method
+// - static method
+// - get property
+// - set property
 export async function activate(context: vscode.ExtensionContext) {
     const functionTracker = new FunctionTracker();
     const cursorScopeResolver = new CursorScopeResolver();

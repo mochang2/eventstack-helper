@@ -5,21 +5,20 @@ It helps developers track function calls by injecting `window.eventStack.set("fu
 
 ## Features
 
-- Automatic EventStack Injection: Automatically adds eventStack tracking code to newly created functions when files are saved
-
-(in the future)It will also support **the key mapping and context menu**, making it easier to manually add a eventstack set function.
+- Automatic EventStack Insertion: Automatically adds eventStack tracking code to newly created functions when files are saved.
+- Manual EventStack Insertion: Manually adds eventStack tracking code to valid functions when using the key mapping, the command palette or the context menu.
 
 > 📷 Demo1 - Automatically Add
 
 ![demo1](https://github.com/mochang2/eventstack-helper/blob/master/videos/automatic_addition_demo.gif)
 
-> 📷 Demo2 - Key Mapping
+> 📷 Demo2 - Command Palette
 
-(in the future)
+![demo2](https://github.com/mochang2/eventstack-helper/blob/master/videos/manual_command_palette_addition_demo.gif)
 
 > 📷 Demo3 - Context Menu
 
-(in the future)
+![demo3](https://github.com/mochang2/eventstack-helper/blob/master/videos/manual_context_menu_addition_demo.gif)
 
 ## Configuration
 
@@ -47,32 +46,118 @@ The extension provides these VSCode settings:
 1. Named Arrow Functions (with or without parameters, except nested objects or rest parameters)
 
 ```javascript
+// automatic (o)
+// manual (o)
+
 const myFunction = (param1, param2) => {
-  // eventStack code automatically added
+  // eventStack code
 };
 ```
 
 2. Named Normal Functions (with or without parameters, except nested objects or rest parameters)
 
 ```javascript
+// automatic (o)
+// manual (o)
+
 function myFunction(param1, param2) {
-  // eventStack code automatically added
+  // eventStack code
 }
 ```
 
 3. Nested Functions
 
 ```javascript
+// automatic (o)
+// manual (o)
+
 function outerFunction() {
   function innerFunction() {
-    // eventStack code automatically added
+    // eventStack code
   }
 }
 ```
 
-4. New Files (Functions added to newly created files get eventStack injection)
+4. Function Expressions Assigned to Variables, Regardless the Existent of the Function Name(`aa` for the below case)
 
-5. Function Renaming (When a function name is changed, eventStack is added if the function doesn't already have it)
+```javascript
+// automatic (x)
+// manual (o)
+
+const variableFunction = function aa() {
+  // eventStack code
+};
+```
+
+5. IIFE(Immediately Invoked Function Expressions), Only in the Case That the Function has name
+
+```javascript
+// automatic (x)
+// manual (o)
+
+(function iifeFunction() {
+  // eventStack code
+});
+```
+
+6. Object Method Functions
+
+```javascript
+// automatic (x)
+// manual (o)
+
+const object = {
+  objectMethod1() {
+    // eventStack code
+  },
+  objectMethod2: () => {
+    // eventStack code
+  },
+  objectMethod3: function () {
+    // eventStack code
+  },
+  objectMethod4: function name() {
+    // eventStack code
+  },
+};
+```
+
+7. class Method Functions
+
+```javascript
+// automatic (x)
+// manual (o)
+
+class Class {
+  classMethod1() {
+    // eventStack code
+  }
+  classMethod2 = () => {
+    // eventStack code
+  }
+  classMethod3 = function () {
+    // eventStack code
+  }
+  classMethod4 = function name() {
+    // eventStack code
+  }
+}
+```
+
+8. Returned Functions, Only in the Case That the Function has name
+
+```javascript
+// automatic (x)
+// manual (o)
+
+return function returnedFunction() {
+  // eventStack code
+};
+```
+
+9. New Files (Functions added to newly created files get eventStack injection)
+
+10. Function Renaming (When a function name is changed, eventStack is added if the function doesn't already have it)
 
 ### NOT Supported
 
@@ -83,15 +168,7 @@ const commonVariable = "This is var1";
 const commonRef = ref(0);
 ```
 
-2. Function Expressions Assigned to Variables
-
-```javascript
-const variableFunction = function aa() {
-  console.log("test");
-};
-```
-
-3. Functions Without Body Blocks
+2. Functions Without Body Blocks
 
 ```javascript
 const oneLineArrowFunction = () => "aa";
@@ -100,14 +177,14 @@ const multiLineArrowFunction = () => ({
 });
 ```
 
-4. One-Line Functions with Body
+3. One-Line Functions with Body
 
 ```javascript
 function oneLineFunction() { console.log("test"); }
 const oneLineArrow = () => { console.log("test"); };
 ```
 
-5. Functions That Already Have EventStack
+4. Functions That Already Have EventStack
 
 ```javascript
 function existingFunction() {
@@ -115,38 +192,9 @@ function existingFunction() {
 }
 ```
 
-6. IIFE (Immediately Invoked Function Expressions)
+5. Files with Parsing Errors (Injection resumes only after parsing errors are fixed)
 
-```javascript
-(function iifeFunction() {
-  console.log("test");
-});
-```
-
-7. Object Method Functions
-
-```javascript
-const object = {
-  arrowFunction: () => {
-    console.log("test");
-  },
-  normalFunction: function() {
-    console.log("test");
-  }
-};
-```
-
-8. Returned Functions
-
-```javascript
-return function returnedFunction() {
-  console.log("test");
-};
-```
-
-9. Files with Parsing Errors (Injection resumes only after parsing errors are fixed)
-
-10. File Renaming (When files are renamed, existing function information is moved but no new eventStack is added)
+6. File Renaming (When files are renamed, existing function information is moved but no new eventStack is added)
 
 ## License
 

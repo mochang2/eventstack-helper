@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2025.11.06
+
+### Added
+
+- Manually add eventStack tracking code to valid functions using:
+  - Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+  - Context Menu (right-click in editor)
+  - Keyboard shortcut (`Ctrl+Shift+E Ctrl+Shift+S` / `Cmd+Shift+E Cmd+Shift+S`)
+
 ## [1.0.1] - 2025.11.03
 
 ### Added
