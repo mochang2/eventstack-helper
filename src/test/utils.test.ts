@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as sinon from "sinon";
 
 export async function waitForLoadingExtension() {
     const extension = vscode.extensions.getExtension(
@@ -63,4 +64,50 @@ export async function setCursorToRandomPositionInCode(
     const editor = await vscode.window.showTextDocument(document);
     editor.selection = new vscode.Selection(randomPosition, randomPosition);
     editor.revealRange(new vscode.Range(randomPosition, randomPosition), vscode.TextEditorRevealType.InCenter);
+}
+
+export function mockEventStackConfig(options: {
+    autoAddEventStack?: boolean;
+    allowedFilePatterns?: string[];
+    eventStackFunctionName?: string;
+}): { 
+    config: sinon.SinonStub,
+    restore: () => void,
+} {
+    const getConfigurationStub = sinon.stub(vscode.workspace, "getConfiguration");
+    const configGetStub = sinon.stub();
+
+    configGetStub.callsFake((key: string) => {
+        switch (key) {
+            case "autoAddEventStack":
+                return options.autoAddEventStack !== undefined 
+                    ? options.autoAddEventStack 
+                    : true;
+            case "allowedFilePatterns":
+                return options.allowedFilePatterns !== undefined 
+                    ? options.allowedFilePatterns 
+                    : [
+                        "**/*.js",
+                        "**/*.ts",
+                        "**/*.vue"
+                    ];
+            case "eventStackFunctionName":
+                return options.eventStackFunctionName !== undefined 
+                    ? options.eventStackFunctionName 
+                    : "window.eventStack.set";
+            default:
+                return undefined;
+        }
+    });
+
+    getConfigurationStub.returns({
+        get: configGetStub
+    } as any);
+
+    return {
+        config: getConfigurationStub,
+        restore: () => {
+            getConfigurationStub.restore();
+        }
+    };
 }

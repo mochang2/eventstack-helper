@@ -9,13 +9,25 @@ import {
     createDocument,
     deleteDocument,
     renameDocument,
+    mockEventStackConfig,
 } from "./utils.test";
 
 suite("ts basic", () => {
-let workspaceRoot: string = "";
+    let workspaceRoot: string = "";
+    let restore = (): void => {};
 
     suiteSetup(() => {
         workspaceRoot = path.resolve(__dirname, "../../fixtures/ts");
+        const { restore: restoreMock } = mockEventStackConfig({
+          autoAddEventStack: true,
+          allowedFilePatterns: ["**/*.js", "**/*.ts", "**/*.vue"],
+          eventStackFunctionName: "window.eventStack.set"
+        });
+        restore = restoreMock;
+  });
+
+    suiteTeardown(() => {
+        restore();
     });
 
     suite("Automatic.vue", () => {

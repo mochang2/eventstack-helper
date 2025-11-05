@@ -7,13 +7,24 @@ import {
   insert,
   remove,
   setCursorToRandomPositionInCode,
+  mockEventStackConfig,
 } from "./utils.test";
 
 suite("js basic", () => {
     let workspaceRoot: string = "";
+    let restore = (): void => {};
 
     suiteSetup(() => {
         workspaceRoot = path.resolve(__dirname, "../../fixtures/js");
+        const { restore: restoreMock } = mockEventStackConfig({
+          allowedFilePatterns: ["**/*.js", "**/*.ts", "**/*.vue"],
+          eventStackFunctionName: "window.eventStack.set"
+        });
+        restore = restoreMock;
+    });
+
+    suiteTeardown(() => {
+        restore();
     });
 
     suite("Manual.vue", () => {
