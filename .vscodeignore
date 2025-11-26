@@ -2,6 +2,7 @@
 .github/**
 fixtures/**
 src/**
+out/test/**
 .gitignore
 **/tsconfig.json
 **/eslint.config.mjs
