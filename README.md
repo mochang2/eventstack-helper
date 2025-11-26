@@ -10,15 +10,15 @@ It helps developers track function calls by injecting `window.eventStack.set("fu
 
 > 📷 Demo1 - Automatically Add
 
-![demo1](https://github.com/mochang2/eventstack-helper/blob/master/videos/automatic_addition_demo.gif)
+![demo1](https://raw.githubusercontent.com/mochang2/eventstack-helper/master/videos/automatic_addition_demo.gif)
 
 > 📷 Demo2 - Command Palette
 
-![demo2](https://github.com/mochang2/eventstack-helper/blob/master/videos/manual_command_palette_addition_demo.gif)
+![demo2](https://raw.githubusercontent.com/mochang2/eventstack-helper/master/videos/manual_command_palette_addition_demo.gif)
 
 > 📷 Demo3 - Context Menu
 
-![demo3](https://github.com/mochang2/eventstack-helper/blob/master/videos/manual_context_menu_addition_demo.gif)
+![demo3](https://raw.githubusercontent.com/mochang2/eventstack-helper/master/videos/manual_context_menu_addition_demo.gif)
 
 ## Configuration
 
