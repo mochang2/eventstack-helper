@@ -10,21 +10,25 @@ export class FunctionTracker {
         "{node_modules,out,dist,build,.nuxt,.next,.output,.vite,coverage,.temp,.cache}/**";
 
     async initialize(): Promise<void> {
-        const files = await vscode.workspace.findFiles(
-            this.validFileGlob,
-            this.invalidFileGlob
-        );
-
-        for (const file of files) {
-            const functions = await getFunctions(file);
-            if (functions) {
-                this.fileFunctionNamesMap.set(
-                    file.fsPath,
-                    functions.map(({ functionName }) => functionName)
-                );
-            } else {
-                this.invalidFiles.add(file.fsPath);
+        try {
+            const files = await vscode.workspace.findFiles(
+                this.validFileGlob,
+                this.invalidFileGlob
+            );
+    
+            for (const file of files) {
+                const functions = await getFunctions(file);
+                if (functions) {
+                    this.fileFunctionNamesMap.set(
+                        file.fsPath,
+                        functions.map(({ functionName }) => functionName)
+                    );
+                } else {
+                    this.invalidFiles.add(file.fsPath);
+                }
             }
+        } catch (error) {
+            console.error(`Error initializing FunctionTracker:`, error);
         }
     }
 

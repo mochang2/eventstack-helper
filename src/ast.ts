@@ -7,17 +7,22 @@ import type { AstResult } from "./types";
 function extractScriptFromVue(
     code: string
 ): { content: string; startLine: number } | null {
-    const { descriptor } = parse(code);
-    const script = descriptor.script || descriptor.scriptSetup; // // <script> block || <script setup> block
-
-    if (script) {
-        return {
-            content: script.content,
-            startLine: script.loc.start.line - 1,
-        };
+    try {
+        const { descriptor } = parse(code);
+        const script = descriptor.script || descriptor.scriptSetup; // // <script> block || <script setup> block
+    
+        if (script) {
+            return {
+                content: script.content,
+                startLine: script.loc.start.line - 1,
+            };
+        }
+    
+        return null;   
+    } catch (error) {
+        console.error(`Error extracting script from Vue file:`, error);
+        return null;
     }
-
-    return null;
 }
 
 export async function getAst(file: vscode.Uri): Promise<AstResult | null> {
