@@ -2,7 +2,7 @@
   "name": "eventstack-helper",
   "displayName": "EventStack Helper",
   "description": "VSCode extension that helps to add(The word insert seems to be dictionary correct, but I'll use add) eventStack tracking codes to function declarations in JavaScript, TypeScript, and Vue files",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "publisher": "qjsrodksro",
   "engines": {
     "vscode": "^1.99.0"
