@@ -4,12 +4,14 @@
     "target": "ES2022",
     "outDir": "out",
     "lib": ["ES2022"],
-    "sourceMap": true,
+    "sourceMap": false,
     "rootDir": "src",
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "removeComments": true,
+    "declaration": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
