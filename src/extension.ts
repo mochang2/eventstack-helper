@@ -27,14 +27,23 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     );
 
+    let isProcessing = false; // suppose there is no simultaneous saving
     const onDidSaveTextDocument = vscode.workspace.onDidSaveTextDocument(
         async (textDocument) => {
+            if (isProcessing) {
+                return;
+            }
+
+            isProcessing = true;
+
             const savedFileUri = textDocument.uri;
             const { newlyAddedFunctions, currentFunctions } =
                 await functionTracker.getFunctions(savedFileUri);
 
-            await automaticallyAddEventStack(savedFileUri, newlyAddedFunctions);
             await functionTracker.updateFile(savedFileUri, currentFunctions);
+            await automaticallyAddEventStack(savedFileUri, newlyAddedFunctions);
+
+            isProcessing = false;
         }
     );
 
