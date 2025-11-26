@@ -52,10 +52,16 @@ function calculateIndentation(
     const functionLine = declarationStartPosition.line + lineAdjustment;
     const functionBodyFirstLine = functionLine + 1;
 
-    const functionIndent =
-        totalLines[functionLine].match(/^(\s+)(?=\S)/)?.[1] || "";
-    const functionBodyFirstLineIndent =
-        totalLines[functionBodyFirstLine].match(/^(\s+)(?=\S)/)?.[1] || "";
+    const functionLineText = functionLine >= 0 && functionLine < totalLines.length 
+        ? totalLines[functionLine] 
+        : "";
+    const functionBodyFirstLineText = functionBodyFirstLine >= 0 && functionBodyFirstLine < totalLines.length 
+        ? totalLines[functionBodyFirstLine] 
+        : "";
+
+    // /^(\s+)(?=\S)/: match the first group of one or more whitespace characters
+    const functionIndent = functionLineText.match(/^(\s+)(?=\S)/)?.[1] || "";
+    const functionBodyFirstLineIndent = functionBodyFirstLineText.match(/^(\s+)(?=\S)/)?.[1] || "";
 
     const hasValidIndentation =
         functionBodyFirstLineIndent.length > functionIndent.length;
