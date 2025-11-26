@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as path from "path";
 import {
     shouldProcessFunctions,
     addEventStackToFunction,
@@ -23,6 +24,11 @@ export async function manuallyAddEventStack(
         await moveCursorToEventStack(fileUri, lastEventStackPosition);
     } catch (error) {
         console.error(`Error manually adding event stack:`, error);
+
+        const fileName = path.basename(fileUri.fsPath);
+        vscode.window.showErrorMessage(
+            `Failed to add EventStack to ${fileName}: An error occurred while processing the file.`
+        );
     }
 }
 
@@ -59,5 +65,10 @@ export async function automaticallyAddEventStack(
         }
     } catch (error) {
         console.error(`Error automatically adding event stack:`, error);
+
+        const fileName = path.basename(fileUri.fsPath);
+        vscode.window.showErrorMessage(
+            `Failed to add EventStack to ${fileName}: An error occurred while processing the file.`
+        );
     }
 }
